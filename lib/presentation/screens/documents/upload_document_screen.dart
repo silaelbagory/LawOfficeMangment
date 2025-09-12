@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -31,7 +33,10 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
   final _descriptionController = TextEditingController();
   final _notesController = TextEditingController();
 
-  File? _selectedFile;
+  // For web compatibility:
+  Uint8List? _selectedFileBytes;
+  String? _selectedFileName;
+  File? _selectedFile; // For mobile/desktop only
   DocumentType _selectedType = DocumentType.other;
   DocumentStatus _selectedStatus = DocumentStatus.pending;
   DateTime? _expiryDate;
@@ -66,12 +71,7 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Upload Document'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.upload),
-            onPressed: _uploadDocument,
-          ),
-        ],
+        // Removed the upload IconButton from actions
       ),
       body: MultiBlocListener(
         listeners: [
@@ -140,7 +140,7 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
               ),
             ),
             const SizedBox(height: AppConstants.defaultPadding),
-            if (_selectedFile == null)
+            if (_selectedFileBytes == null && _selectedFile == null)
               Container(
                 width: double.infinity,
                 height: 200,
@@ -199,7 +199,7 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
                     Row(
                       children: [
                         Icon(
-                          _getFileIcon(_selectedFile!.path),
+                          _getFileIcon(_selectedFileName ?? ''),
                           color: theme.colorScheme.primary,
                           size: 32,
                         ),
@@ -209,7 +209,7 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                _selectedFile!.path.split('/').last,
+                                _selectedFileName ?? '',
                                 style: theme.textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -218,7 +218,11 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                _getFileSize(_selectedFile!),
+                                _selectedFile != null
+                                    ? _getFileSize(_selectedFile!)
+                                    : _selectedFileBytes != null
+                                        ? '${(_selectedFileBytes!.length / 1024).toStringAsFixed(1)} KB'
+                                        : '',
                                 style: theme.textTheme.bodySmall?.copyWith(
                                   color: theme.colorScheme.onSurfaceVariant,
                                 ),
@@ -231,6 +235,8 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
                           onPressed: () {
                             setState(() {
                               _selectedFile = null;
+                              _selectedFileBytes = null;
+                              _selectedFileName = null;
                             });
                           },
                         ),
@@ -505,31 +511,24 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
 
   Future<void> _selectFile() async {
     try {
-      final storageService = StorageService();
-      final file = await storageService.pickFile(
-        allowedExtensions: storageService.getAllowedDocumentExtensions(),
+      final result = await FilePicker.platform.pickFiles(
+        withData: true, // This is important for web!
+        allowedExtensions: StorageService().getAllowedDocumentExtensions(),
+        type: FileType.custom,
         dialogTitle: 'Select Document',
       );
-      
-      if (file != null) {
-        // Validate file size
-        final fileSize = await file.length();
-        final maxSize = storageService.getMaxDocumentSize();
-        
-        if (!storageService.validateFileSize(fileSize, maxSize)) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('File size too large. Maximum size is ${storageService.formatFileSize(maxSize)}'),
-                backgroundColor: Theme.of(context).colorScheme.error,
-              ),
-            );
-          }
-          return;
-        }
-        
+      if (result != null && result.files.single.bytes != null) {
         setState(() {
-          _selectedFile = file;
+          _selectedFileBytes = result.files.single.bytes;
+          _selectedFileName = result.files.single.name;
+          _selectedFile = null; // Clear File
+        });
+      } else if (result != null && result.files.single.path != null) {
+        // For mobile/desktop
+        setState(() {
+          _selectedFile = File(result.files.single.path!);
+          _selectedFileBytes = null;
+          _selectedFileName = result.files.single.name;
         });
       }
     } catch (e) {
@@ -609,24 +608,24 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
   }
 
   void _uploadDocument() async {
-    if (_selectedFile == null) {
+    if ((_selectedFileBytes == null && _selectedFile == null) || _selectedFileName == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select a file to upload')),
       );
       return;
     }
-
     if (_formKey.currentState?.validate() ?? false) {
       final user = context.read<AuthCubit>().currentUser;
       if (user != null) {
-        final documentName = _nameController.text.trim().isNotEmpty 
-            ? _nameController.text.trim() 
-            : _selectedFile!.path.split('/').last;
-            
+        final documentName = _nameController.text.trim().isNotEmpty
+            ? _nameController.text.trim()
+            : _selectedFileName!;
         try {
-          // Upload the document
+          // Upload the document (web: bytes, mobile: File)
           await context.read<DocumentCubit>().uploadDocumentFile(
-            file: _selectedFile!,
+            file: _selectedFile, // null on web
+            fileBytes: _selectedFileBytes, // null on mobile
+            fileName: _selectedFileName!,
             userId: user.id,
             managerId: user.role == UserRole.manager ? user.id : user.createdBy ?? user.id,
             caseId: _selectedCaseId,
@@ -635,20 +634,15 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
             type: _selectedType,
             tags: _tags,
           );
-          
-          // Check if widget is still mounted before accessing context
           if (!mounted) return;
-          
-          // Log the action
           await context.read<ActionCubit>().logDocumentUpload(
             lawyerId: user.id,
             lawyerName: user.name,
             managerId: user.role == UserRole.manager ? user.id : user.createdBy ?? user.id,
             documentName: documentName,
-            documentId: null, // Document ID will be set by Firestore
+            documentId: null,
           );
         } catch (e) {
-          // Handle any errors gracefully
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text('Error: $e')),
