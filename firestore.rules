@@ -1,0 +1,137 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isManager() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'manager';
+    }
+    
+    function isLawyer() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'lawyer';
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function hasPermission(permission) {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.permissions[permission] == true;
+    }
+    
+    // Users collection rules
+    match /users/{userId} {
+      // Users can read their own profile
+      allow read: if isOwner(userId);
+      
+      // Allow user creation for signup (will be pending status)
+      allow create: if isAuthenticated();
+      
+      // Users can update their own profile, managers can update any user
+      allow update: if isOwner(userId) || isManager();
+      
+      // Only managers can delete users (soft delete by deactivating)
+      allow delete: if isManager();
+    }
+    
+    // Cases collection rules
+    match /cases/{caseId} {
+      // Users can read cases if they have casesRead permission
+      allow read: if isAuthenticated() && 
+                     (hasPermission('casesRead') || isManager());
+      
+      // Users can create cases if they have casesWrite permission
+      allow create: if isAuthenticated() && 
+                       (hasPermission('casesWrite') || isManager());
+      
+      // Users can update cases if they have casesWrite permission
+      allow update: if isAuthenticated() && 
+                       (hasPermission('casesWrite') || isManager());
+      
+      // Users can delete cases if they have casesWrite permission
+      allow delete: if isAuthenticated() && 
+                       (hasPermission('casesWrite') || isManager());
+    }
+    
+    // Clients collection rules
+    match /clients/{clientId} {
+      // Users can read clients if they have clientsRead permission
+      allow read: if isAuthenticated() && 
+                     (hasPermission('clientsRead') || isManager());
+      
+      // Users can create clients if they have clientsWrite permission
+      allow create: if isAuthenticated() && 
+                       (hasPermission('clientsWrite') || isManager());
+      
+      // Users can update clients if they have clientsWrite permission
+      allow update: if isAuthenticated() && 
+                       (hasPermission('clientsWrite') || isManager());
+      
+      // Users can delete clients if they have clientsWrite permission
+      allow delete: if isAuthenticated() && 
+                       (hasPermission('clientsWrite') || isManager());
+    }
+    
+    // Documents collection rules
+    match /documents/{documentId} {
+      // Users can read documents if they have documentsRead permission
+      allow read: if isAuthenticated() && 
+                     (hasPermission('documentsRead') || isManager());
+      
+      // Users can create documents if they have documentsWrite permission
+      allow create: if isAuthenticated() && 
+                       (hasPermission('documentsWrite') || isManager());
+      
+      // Users can update documents if they have documentsWrite permission
+      allow update: if isAuthenticated() && 
+                       (hasPermission('documentsWrite') || isManager());
+      
+      // Users can delete documents if they have documentsWrite permission
+      allow delete: if isAuthenticated() && 
+                       (hasPermission('documentsWrite') || isManager());
+    }
+    
+    // Lawyer actions collection rules
+    match /lawyer_actions/{actionId} {
+      // All authenticated users can read lawyer actions
+      allow read: if isAuthenticated();
+      
+      // Only lawyers and managers can write to lawyer actions
+      allow create: if isAuthenticated() && (isLawyer() || isManager());
+      
+      // Only managers can update or delete lawyer actions
+      allow update, delete: if isManager();
+    }
+    
+    // Reports collection rules (if you add reports later)
+    match /reports/{reportId} {
+      // Users can read reports if they have reportsRead permission
+      allow read: if isAuthenticated() && 
+                     (hasPermission('reportsRead') || isManager());
+      
+      // Users can create reports if they have reportsWrite permission
+      allow create: if isAuthenticated() && 
+                       (hasPermission('reportsWrite') || isManager());
+      
+      // Users can update reports if they have reportsWrite permission
+      allow update: if isAuthenticated() && 
+                       (hasPermission('reportsWrite') || isManager());
+      
+      // Users can delete reports if they have reportsWrite permission
+      allow delete: if isAuthenticated() && 
+                       (hasPermission('reportsWrite') || isManager());
+    }
+    
+    // Default deny rule for any other collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

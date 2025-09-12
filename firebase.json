@@ -1,0 +1,39 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "law-office-management-sy-37891",
+          "appId": "1:774441679128:android:003890894bea9e3d2e066d",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "law-office-management-sy-37891",
+          "configurations": {
+            "android": "1:774441679128:android:003890894bea9e3d2e066d",
+            "ios": "1:774441679128:ios:68d3e9d0791f89722e066d",
+            "macos": "1:774441679128:ios:68d3e9d0791f89722e066d",
+            "web": "1:774441679128:web:51f1bee175833fbd2e066d",
+            "windows": "1:774441679128:web:606c653b711a037b2e066d"
+          }
+        }
+      }
+    }
+  },
+  "hosting": {
+    "public": "build\\web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

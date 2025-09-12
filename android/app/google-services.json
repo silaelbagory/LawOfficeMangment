@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "774441679128",
+    "project_id": "law-office-management-sy-37891",
+    "storage_bucket": "law-office-management-sy-37891.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:774441679128:android:003890894bea9e3d2e066d",
+        "android_client_info": {
+          "package_name": "com.example.lawofficemanagementsystem"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "774441679128-rnfkrjbmosak5b4bj1cq7sulsaeeuhqn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.lawofficemanagementsystem",
+            "certificate_hash": "13ba5cd63d2ba8478683c3c11982012e5d656da9"
+          }
+        },
+        {
+          "client_id": "774441679128-v2071pmrg8cl5nf8ejg936rafpc6luo7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB_1cDl3T7-iwCHUiMZOKE3nDmlq83cI2U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "774441679128-v2071pmrg8cl5nf8ejg936rafpc6luo7.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "774441679128-4oib10na4i96ik7mcj64q5hrv7cpha6s.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.lawofficemanagementsystem"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
