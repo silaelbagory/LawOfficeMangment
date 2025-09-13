@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
@@ -130,6 +131,37 @@ class SupabaseStorageService {
       throw 'Failed to delete file: $e';
     }
   }
+Future<String> uploadDocumentBytes({
+  required Uint8List bytes,
+  required String fileName,
+  required String userId,
+  String? caseId,
+}) async {
+  try {
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final fileExtension = fileName.split('.').last;
+    final baseFileName = fileName.split('.').first;
+    final uniqueFileName = '${baseFileName}_$timestamp.$fileExtension';
+
+    final path = caseId != null 
+        ? 'users/$userId/cases/$caseId/$uniqueFileName'
+        : 'users/$userId/documents/$uniqueFileName';
+
+    // ✅ رفع الـ bytes على Supabase
+    await _supabase.storage
+        .from('documents')
+        .uploadBinary(path, bytes);
+
+    // ✅ إرجاع رابط الملف
+    final publicUrl = _supabase.storage
+        .from('documents')
+        .getPublicUrl(path);
+
+    return publicUrl;
+  } catch (e) {
+    throw 'Failed to upload document bytes: $e';
+  }
+}
 
   // Get file info
   Future<Map<String, dynamic>?> getFileInfo(String filePath) async {

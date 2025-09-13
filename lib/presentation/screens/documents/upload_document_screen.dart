@@ -510,38 +510,48 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
   }
 
   Future<void> _selectFile() async {
-    try {
-      final result = await FilePicker.platform.pickFiles(
-        withData: true, // This is important for web!
-        allowedExtensions: StorageService().getAllowedDocumentExtensions(),
-        type: FileType.custom,
-        dialogTitle: 'Select Document',
-      );
-      if (result != null && result.files.single.bytes != null) {
-        setState(() {
-          _selectedFileBytes = result.files.single.bytes;
-          _selectedFileName = result.files.single.name;
-          _selectedFile = null; // Clear File
-        });
-      } else if (result != null && result.files.single.path != null) {
-        // For mobile/desktop
-        setState(() {
-          _selectedFile = File(result.files.single.path!);
+  try {
+    final result = await FilePicker.platform.pickFiles(
+      withData: true, // مهم عشان الويب
+      allowedExtensions: StorageService().getAllowedDocumentExtensions(),
+      type: FileType.custom,
+      dialogTitle: 'Select Document',
+    );
+
+    if (result != null && result.files.isNotEmpty) {
+      final pickedFile = result.files.single;
+
+      setState(() {
+        _selectedFileName = pickedFile.name;
+
+        if (pickedFile.bytes != null) {
+          // Web أو أي منصة ترجّع bytes
+          _selectedFileBytes = pickedFile.bytes;
+          _selectedFile = null;
+        } else if (pickedFile.path != null) {
+          // Mobile/Desktop
+          _selectedFile = File(pickedFile.path!);
           _selectedFileBytes = null;
-          _selectedFileName = result.files.single.name;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to select file: $e'),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
-      }
+        } else {
+          // لا bytes ولا path → خطأ
+          _selectedFile = null;
+          _selectedFileBytes = null;
+          _selectedFileName = null;
+        }
+      });
+    }
+  } catch (e) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to select file: $e'),
+          backgroundColor: Theme.of(context).colorScheme.error,
+        ),
+      );
     }
   }
+}
+
 
   Future<void> _selectExpiryDate() async {
     final DateTime? picked = await showDatePicker(

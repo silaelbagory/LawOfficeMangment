@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import '../../core/services/firestore_service.dart';
 import '../../core/services/supabase_storage_service.dart';
@@ -61,54 +62,67 @@ class DocumentRepository {
 
   // Upload document file
   Future<String> uploadDocumentFile({
-    required File file,
-    required String userId,
-    required String managerId,
-    String? caseId,
-    String? clientId,
-    String? name,
-    String? description,
-    DocumentType type = DocumentType.other,
-    List<String> tags = const [],
-  }) async {
-    try {
-      // Upload file to Supabase Storage
-      final fileUrl = await _storageService.uploadDocument(
+  File? file,             // Mobile
+  Uint8List? fileBytes,   // Web
+  required String fileName,
+  required String userId,
+  required String managerId,
+  String? caseId,
+  String? clientId,
+  String? name,
+  String? description,
+  DocumentType type = DocumentType.other,
+  List<String> tags = const [],
+  Function(double)? onProgress,
+}) async {
+  try {
+    // ✅ Choose between file (mobile) or fileBytes (web)
+    String fileUrl;
+    if (file != null) {
+      fileUrl = await _storageService.uploadDocument(
         file: file,
         userId: userId,
         caseId: caseId,
       );
-
-      // Create document model
-      final documentModel = DocumentModel(
-        id: '', // Will be set by Firestore
-        name: name ?? file.path.split('/').last,
-        originalName: file.path.split('/').last,
-        description: description ?? '',
+    } else if (fileBytes != null) {
+      fileUrl = await _storageService.uploadDocumentBytes(
+        bytes: fileBytes,
+        fileName: fileName,
         userId: userId,
-        managerId: managerId,
         caseId: caseId,
-        clientId: clientId,
-        type: type,
-        fileUrl: fileUrl,
-        filePath: _storageService.extractFilePathFromUrl(fileUrl),
-        fileExtension: _storageService.getFileExtension(file.path),
-        fileSize: await file.length(),
-        mimeType: _storageService.getMimeType(file.path),
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-        tags: tags,
-        uploadedBy: userId,
       );
-
-      // Save document record to Firestore
-      final documentId = await createDocument(documentModel);
-      
-      return documentId;
-    } catch (e) {
-      throw Exception('Failed to upload document: $e');
+    } else {
+      throw Exception("No file provided");
     }
+
+    final documentModel = DocumentModel(
+      id: '',
+      name: name ?? fileName,
+      originalName: fileName,
+      description: description ?? '',
+      userId: userId,
+      managerId: managerId,
+      caseId: caseId,
+      clientId: clientId,
+      type: type,
+      fileUrl: fileUrl,
+      filePath: _storageService.extractFilePathFromUrl(fileUrl),
+      fileExtension: _storageService.getFileExtension(fileName),
+      fileSize: file != null ? await file.length() : fileBytes!.length,
+      mimeType: _storageService.getMimeType(fileName),
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      tags: tags,
+      uploadedBy: userId,
+    );
+
+    final documentId = await createDocument(documentModel);
+    return documentId;
+  } catch (e) {
+    throw Exception('Failed to upload document: $e');
   }
+}
+
 
   // Get documents by manager
   Future<List<DocumentModel>> getDocumentsByManager(String managerId) async {

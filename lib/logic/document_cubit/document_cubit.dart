@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -12,62 +13,53 @@ class DocumentCubit extends Cubit<DocumentState> {
   DocumentCubit(this._documentRepository) : super(DocumentInitial());
 
   // Upload document file
-  Future<void> uploadDocumentFile({
-    required File file,
-    required String userId,
-    required String managerId,
-    String? caseId,
-    String? clientId,
-    String? name,
-    String? description,
-    DocumentType type = DocumentType.other,
-    List<String> tags = const [],
-    Function(double)? onProgress,
-  }) async {
-    try {
-      emit(DocumentUploading(0.0));
-      
-      final documentId = await _documentRepository.uploadDocumentFile(
-        file: file,
-        userId: userId,
-        managerId: managerId,
-        caseId: caseId,
-        clientId: clientId,
-        name: name,
-        description: description,
-        type: type,
-        tags: tags,
-      );
-      
-      // Get the created document
-      final document = await _documentRepository.getDocument(documentId);
-      if (document != null) {
-        emit(DocumentUploaded(document));
-        
-        // Reload documents
-        await loadDocuments(userId);
-      }
-    } catch (e) {
-      emit(DocumentUploadError('Failed to upload document: $e'));
-    }
-  }
+ Future<String> uploadDocumentFile({
+  required File? file, // خليه nullable عشان الويب
+  Uint8List? fileBytes, // للويب
+  required String fileName,
+  required String userId,
+  required String managerId,
+  String? caseId,
+  String? clientId,
+  String? name,
+  String? description,
+  DocumentType type = DocumentType.other,
+  List<String> tags = const [],
+  Function(double)? onProgress,
+}) async {
+  try {
+    emit(DocumentUploading(0.0));
 
-  // Create a new document
-  Future<void> createDocument(DocumentModel documentModel) async {
-    try {
-      emit(DocumentLoading());
-      
-      final documentId = await _documentRepository.createDocument(documentModel);
-      final createdDocument = documentModel.copyWith(id: documentId);
-      
-      emit(DocumentCreated(createdDocument));
-      
-      // Reload documents
-      await loadDocuments(documentModel.userId);
-    } catch (e) {
-      emit(DocumentError('Failed to create document: $e'));
+    final documentId = await _documentRepository.uploadDocumentFile(
+      file: file,
+      fileBytes: fileBytes,
+      fileName: fileName,
+      userId: userId,
+      managerId: managerId,
+      caseId: caseId,
+      clientId: clientId,
+      name: name,
+      description: description,
+      type: type,
+      tags: tags,
+      onProgress: onProgress,
+    );
+
+    // Get the created document
+    final document = await _documentRepository.getDocument(documentId);
+    if (document != null) {
+      emit(DocumentUploaded(document));
+
+      // Reload documents for this user
+      await loadDocuments(userId);
     }
+
+    return documentId; // ✅ رجع ID للمستند
+  } catch (e) {
+    emit(DocumentUploadError('Failed to upload document: $e'));
+    rethrow; // مهم عشان _uploadDocument تقدر تمسك الخطأ
   }
+}
 
   // Load documents by manager
   Future<void> loadDocumentsByManager(String managerId) async {
