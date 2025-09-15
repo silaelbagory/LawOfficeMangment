@@ -24,6 +24,7 @@ jobs:
 
       # ✅ Build project
       - run: flutter pub get
+      - run: flutter gen-l10n
       - run: flutter build web --release
 
       # ✅ Deploy to Firebase Hosting (Preview Channel)
