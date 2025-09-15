@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../core/utils/constants.dart';
+import '../../../core/utils/responsive_utils.dart';
 import '../../../data/models/client_model.dart';
 import '../../../data/models/user_model.dart';
 import '../../../logic/auth_cubit/auth_cubit.dart';
@@ -55,8 +56,6 @@ class _ClientsListScreenState extends State<ClientsListScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final size = MediaQuery.of(context).size;
-    final isTablet = size.width > AppConstants.mobileBreakpoint;
 
     return Scaffold(
       appBar: AppBar(
@@ -120,9 +119,11 @@ class _ClientsListScreenState extends State<ClientsListScreen> {
                     return _buildEmptyState(theme);
                   }
 
-                  return isTablet
-                      ? _buildTabletView(theme, clients)
-                      : _buildMobileView(theme, clients);
+                  return ResponsiveWidget(
+                    mobile: _buildMobileView(theme, clients),
+                    tablet: _buildTabletView(theme, clients),
+                    desktop: _buildDesktopView(theme, clients),
+                  );
                 }
                 
                 return const Center(child: CircularProgressIndicator());
@@ -139,8 +140,7 @@ class _ClientsListScreenState extends State<ClientsListScreen> {
   }
 
   Widget _buildSearchAndFilters(ThemeData theme) {
-    return Container(
-      padding: const EdgeInsets.all(AppConstants.defaultPadding),
+    return ResponsiveContainer(
       child: Column(
         children: [
           SearchTextField(
@@ -151,7 +151,7 @@ class _ClientsListScreenState extends State<ClientsListScreen> {
               });
             },
           ),
-          const SizedBox(height: AppConstants.smallPadding),
+          SizedBox(height: AppConstants.smallPadding),
           _buildFilterChips(theme),
         ],
       ),
@@ -227,7 +227,7 @@ class _ClientsListScreenState extends State<ClientsListScreen> {
 
   Widget _buildMobileView(ThemeData theme, List<ClientModel> clients) {
     return ListView.builder(
-      padding: const EdgeInsets.all(AppConstants.defaultPadding),
+      padding: EdgeInsets.all(ResponsiveUtils.getResponsivePadding(context)),
       itemCount: clients.length,
       itemBuilder: (context, index) {
         final client = clients[index];
@@ -238,7 +238,7 @@ class _ClientsListScreenState extends State<ClientsListScreen> {
 
   Widget _buildTabletView(ThemeData theme, List<ClientModel> clients) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppConstants.defaultPadding),
+      padding: EdgeInsets.all(ResponsiveUtils.getResponsivePadding(context)),
       child: DataTable(
         columns: [
           const DataColumn(label: Text('Name')),
@@ -249,6 +249,26 @@ class _ClientsListScreenState extends State<ClientsListScreen> {
           const DataColumn(label: Text('Actions')),
         ],
         rows: clients.map((client) => _buildDataTableRow(theme, client)).toList(),
+      ),
+    );
+  }
+
+  Widget _buildDesktopView(ThemeData theme, List<ClientModel> clients) {
+    return ResponsiveContainer(
+      child: SingleChildScrollView(
+        child: DataTable(
+          columnSpacing: ResponsiveUtils.getResponsivePadding(context),
+          columns: [
+            const DataColumn(label: Text('Name')),
+            const DataColumn(label: Text('Email')),
+            const DataColumn(label: Text('Phone')),
+            const DataColumn(label: Text('Type')),
+            const DataColumn(label: Text('Status')),
+            const DataColumn(label: Text('Company')),
+            const DataColumn(label: Text('Actions')),
+          ],
+          rows: clients.map((client) => _buildDesktopDataTableRow(theme, client)).toList(),
+        ),
       ),
     );
   }
@@ -295,6 +315,64 @@ class _ClientsListScreenState extends State<ClientsListScreen> {
               IconButton(
                 icon: const Icon(Icons.delete),
                 onPressed: () => _deleteClient(client),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  DataRow _buildDesktopDataTableRow(ThemeData theme, ClientModel client) {
+    return DataRow(
+      cells: [
+        DataCell(
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 16,
+                backgroundColor: theme.colorScheme.primary,
+                child: Text(
+                  client.initials,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.colorScheme.onPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppConstants.smallPadding),
+              Text(
+                client.displayName,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+        DataCell(Text(client.email)),
+        DataCell(Text(client.phoneNumber ?? 'No phone')),
+        DataCell(Text(client.typeDisplayText)),
+        DataCell(_buildStatusChip(theme, client.status)),
+        DataCell(Text(client.companyName ?? 'N/A')),
+        DataCell(
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.visibility),
+                onPressed: () => _viewClient(client),
+                tooltip: 'View',
+              ),
+              IconButton(
+                icon: const Icon(Icons.edit),
+                onPressed: () => _editClient(client),
+                tooltip: 'Edit',
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete),
+                onPressed: () => _deleteClient(client),
+                tooltip: 'Delete',
               ),
             ],
           ),

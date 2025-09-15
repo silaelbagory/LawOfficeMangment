@@ -6,6 +6,7 @@ import 'package:lawofficemanagementsystem/presentation/screens/managers/lawyer_a
 import 'package:lawofficemanagementsystem/presentation/screens/managers/manager_lawers.dart';
 
 import '../../../core/utils/constants.dart';
+import '../../../core/utils/responsive_utils.dart';
 import '../../../data/models/user_model.dart';
 import '../../../logic/auth_cubit/auth_cubit.dart';
 import '../../../logic/user_cubit/user_cubit.dart';
@@ -107,18 +108,219 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
               );
             }
 
-            return ListView.builder(
-              padding: const EdgeInsets.all(AppConstants.defaultPadding),
-              itemCount: lawyers.length,
-              itemBuilder: (context, index) {
-                final lawyer = lawyers[index];
-                return _buildLawyerCard(lawyer, theme);
-              },
+            return ResponsiveWidget(
+              mobile: ListView.builder(
+                padding: EdgeInsets.all(ResponsiveUtils.getResponsivePadding(context)),
+                itemCount: lawyers.length,
+                itemBuilder: (context, index) {
+                  final lawyer = lawyers[index];
+                  return _buildLawyerCard(lawyer, theme);
+                },
+              ),
+              tablet: _buildTabletView(lawyers, theme),
+              desktop: _buildDesktopView(lawyers, theme),
             );
           }
 
           return const SizedBox.shrink();
         },
+      ),
+    );
+  }
+
+  Widget _buildTabletView(List<UserModel> lawyers, ThemeData theme) {
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(ResponsiveUtils.getResponsivePadding(context)),
+      child: DataTable(
+        columns: [
+          const DataColumn(label: Text('Name')),
+          const DataColumn(label: Text('Email')),
+          const DataColumn(label: Text('Status')),
+          const DataColumn(label: Text('Joined')),
+          const DataColumn(label: Text('Actions')),
+        ],
+        rows: lawyers.map((lawyer) => _buildDataTableRow(lawyer, theme)).toList(),
+      ),
+    );
+  }
+
+  Widget _buildDesktopView(List<UserModel> lawyers, ThemeData theme) {
+    return ResponsiveContainer(
+      child: SingleChildScrollView(
+        child: DataTable(
+          columnSpacing: ResponsiveUtils.getResponsivePadding(context),
+          columns: [
+            const DataColumn(label: Text('Name')),
+            const DataColumn(label: Text('Email')),
+            const DataColumn(label: Text('Status')),
+            const DataColumn(label: Text('Joined')),
+            const DataColumn(label: Text('Permissions')),
+            const DataColumn(label: Text('Actions')),
+          ],
+          rows: lawyers.map((lawyer) => _buildDesktopDataTableRow(lawyer, theme)).toList(),
+        ),
+      ),
+    );
+  }
+
+  DataRow _buildDataTableRow(UserModel lawyer, ThemeData theme) {
+    final dateFormat = DateFormat('MMM dd, yyyy');
+    
+    return DataRow(
+      cells: [
+        DataCell(
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 16,
+                backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+                child: Icon(
+                  Icons.person,
+                  color: theme.colorScheme.primary,
+                  size: 16,
+                ),
+              ),
+              const SizedBox(width: AppConstants.smallPadding),
+              Text(
+                lawyer.name,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+        DataCell(Text(lawyer.email)),
+        DataCell(_buildStatusChip(lawyer.isActive, theme)),
+        DataCell(Text(dateFormat.format(lawyer.createdAt))),
+        DataCell(
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.edit),
+                onPressed: () => _editLawyer(lawyer),
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete),
+                onPressed: () => _deleteLawyer(lawyer),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  DataRow _buildDesktopDataTableRow(UserModel lawyer, ThemeData theme) {
+    final dateFormat = DateFormat('MMM dd, yyyy');
+    
+    return DataRow(
+      cells: [
+        DataCell(
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 16,
+                backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+                child: Icon(
+                  Icons.person,
+                  color: theme.colorScheme.primary,
+                  size: 16,
+                ),
+              ),
+              const SizedBox(width: AppConstants.smallPadding),
+              Text(
+                lawyer.name,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+        DataCell(Text(lawyer.email)),
+        DataCell(_buildStatusChip(lawyer.isActive, theme)),
+        DataCell(Text(dateFormat.format(lawyer.createdAt))),
+        DataCell(Text(_getPermissionsSummary(lawyer.permissions))),
+        DataCell(
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.visibility),
+                onPressed: () => _viewLawyer(lawyer),
+                tooltip: 'View',
+              ),
+              IconButton(
+                icon: const Icon(Icons.edit),
+                onPressed: () => _editLawyer(lawyer),
+                tooltip: 'Edit',
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete),
+                onPressed: () => _deleteLawyer(lawyer),
+                tooltip: 'Delete',
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  String _getPermissionsSummary(UserPermissions permissions) {
+    final activePermissions = <String>[];
+    if (permissions.casesRead) activePermissions.add('Cases');
+    if (permissions.clientsRead) activePermissions.add('Clients');
+    if (permissions.documentsRead) activePermissions.add('Documents');
+    if (permissions.usersRead) activePermissions.add('Users');
+    
+    return activePermissions.isEmpty ? 'No permissions' : activePermissions.join(', ');
+  }
+
+  void _viewLawyer(UserModel lawyer) {
+    // Navigate to lawyer details view
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LawyerActionsScreen(lawyer: lawyer),
+      ),
+    );
+  }
+
+  void _editLawyer(UserModel lawyer) {
+    // Navigate to edit lawyer screen
+    Navigator.pushNamed(
+      context,
+      '/edit-lawyer',
+      arguments: lawyer,
+    );
+  }
+
+  void _deleteLawyer(UserModel lawyer) {
+    // Show confirmation dialog and delete lawyer
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Delete Lawyer'),
+        content: Text('Are you sure you want to delete ${lawyer.name}?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              // TODO: Implement delete user functionality
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Delete functionality not implemented yet')),
+              );
+            },
+            child: Text('Delete'),
+          ),
+        ],
       ),
     );
   }

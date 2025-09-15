@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/services/storage_service.dart';
 import '../../../core/utils/constants.dart';
+import '../../../core/utils/responsive_utils.dart';
 import '../../../core/utils/validators.dart';
 import '../../../data/models/case_model.dart';
 import '../../../data/models/document_model.dart';
@@ -102,23 +103,24 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
             },
           ),
         ],
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppConstants.defaultPadding),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildFileSelectionSection(theme),
-                const SizedBox(height: AppConstants.largePadding),
-                _buildDocumentInfoSection(theme),
-                const SizedBox(height: AppConstants.largePadding),
-                _buildDocumentSettingsSection(theme),
-                const SizedBox(height: AppConstants.largePadding),
-                _buildTagsSection(theme),
-                const SizedBox(height: AppConstants.largePadding),
-                _buildActionButtons(theme),
-              ],
+        child: ResponsiveContainer(
+          child: SingleChildScrollView(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildFileSelectionSection(theme),
+                  SizedBox(height: ResponsiveUtils.getResponsivePadding(context)),
+                  _buildDocumentInfoSection(theme),
+                  SizedBox(height: ResponsiveUtils.getResponsivePadding(context)),
+                  _buildDocumentSettingsSection(theme),
+                  SizedBox(height: ResponsiveUtils.getResponsivePadding(context)),
+                  _buildTagsSection(theme),
+                  SizedBox(height: ResponsiveUtils.getResponsivePadding(context)),
+                  _buildActionButtons(theme),
+                ],
+              ),
             ),
           ),
         ),

@@ -97,10 +97,12 @@ class CustomButton extends StatelessWidget {
               ? SizedBox(
                   width: 20,
                   height: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      buttonStyle.foregroundColor?.resolve({}) ?? theme.colorScheme.onPrimary,
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        buttonStyle.foregroundColor?.resolve({}) ?? theme.colorScheme.onPrimary,
+                      ),
                     ),
                   ),
                 )
@@ -120,44 +122,70 @@ class CustomButton extends StatelessWidget {
     Widget buttonChild = child ??
         (isLoading
             ? Row(
-                mainAxisSize: MainAxisSize.min,
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   SizedBox(
                     width: 20,
                     height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(
-                        buttonStyle.foregroundColor?.resolve({}) ?? theme.colorScheme.onPrimary,
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          buttonStyle.foregroundColor?.resolve({}) ?? theme.colorScheme.onPrimary,
+                        ),
                       ),
                     ),
                   ),
                   if (text != null) ...[
                     const SizedBox(width: 8),
-                    Text(text!),
+                    Expanded(
+                      child: Text(
+                        text!,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: _getTextSize(),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
                   ],
                 ],
               )
             : Row(
                 mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   if (icon != null) ...[
                     Icon(icon, size: _getIconSize()),
                     if (text != null) const SizedBox(width: 8),
                   ],
-                  if (text != null) Text(text!),
+                  if (text != null) 
+                    Flexible(
+                      child: Text(
+                        text!,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: _getTextSize(),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
                 ],
               ));
 
     if (type == ButtonType.text) {
       return SizedBox(
-        width: width,
+        width: width ?? double.infinity,
         height: height ?? buttonHeight,
         child: TextButton(
           onPressed: _isButtonEnabled() ? onPressed : null,
           style: TextButton.styleFrom(
             foregroundColor: buttonStyle.foregroundColor?.resolve({}),
             padding: buttonPadding,
+            minimumSize: Size(width ?? 120, height ?? buttonHeight),
             shape: RoundedRectangleBorder(
               borderRadius: buttonBorderRadius,
             ),
@@ -168,7 +196,7 @@ class CustomButton extends StatelessWidget {
     }
 
     return SizedBox(
-      width: width,
+      width: width ?? double.infinity,
       height: height ?? buttonHeight,
       child: ElevatedButton(
         onPressed: _isButtonEnabled() ? onPressed : null,
@@ -176,6 +204,7 @@ class CustomButton extends StatelessWidget {
           backgroundColor: buttonStyle.backgroundColor?.resolve({}),
           foregroundColor: buttonStyle.foregroundColor?.resolve({}),
           padding: buttonPadding,
+          minimumSize: Size(width ?? 120, height ?? buttonHeight),
           shape: RoundedRectangleBorder(
             borderRadius: buttonBorderRadius,
             side: buttonStyle.side?.resolve({}) ?? BorderSide.none,
@@ -284,6 +313,17 @@ class CustomButton extends StatelessWidget {
         return 20;
       case ButtonSize.large:
         return 24;
+    }
+  }
+
+  double _getTextSize() {
+    switch (size) {
+      case ButtonSize.small:
+        return 12;
+      case ButtonSize.medium:
+        return 14;
+      case ButtonSize.large:
+        return 16;
     }
   }
 

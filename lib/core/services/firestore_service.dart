@@ -326,7 +326,20 @@ class FirestoreService {
       data: caseData,
     );
   }
+Future<String?> getClientNameById(String clientId) async {
+    try {
+      DocumentSnapshot doc = await _firestore.collection('clients').doc(clientId).get();
 
+      if (doc.exists) {
+        return doc['name'] as String; // assuming your field is "name"
+      } else {
+        return null; // client not found
+      }
+    } catch (e) {
+      print('Error getting client name: $e');
+      return null;
+    }
+  }
   Future<Map<String, dynamic>?> getCase(String caseId) async {
     return await getDocument(
       collection: AppConstants.casesCollection,

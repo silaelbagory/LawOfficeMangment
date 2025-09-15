@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../core/utils/constants.dart';
+import '../../../core/utils/responsive_utils.dart';
 import '../../../data/models/document_model.dart';
 import '../../../data/models/user_model.dart';
 import '../../../logic/auth_cubit/auth_cubit.dart';
@@ -54,8 +55,6 @@ class _DocumentsListScreenState extends State<DocumentsListScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final size = MediaQuery.of(context).size;
-    final isTablet = size.width > AppConstants.mobileBreakpoint;
 
     return Scaffold(
       appBar: AppBar(
@@ -119,9 +118,11 @@ class _DocumentsListScreenState extends State<DocumentsListScreen> {
                     return _buildEmptyState(theme);
                   }
 
-                  return isTablet
-                      ? _buildTabletView(theme, documents)
-                      : _buildMobileView(theme, documents);
+                  return ResponsiveWidget(
+                    mobile: _buildMobileView(theme, documents),
+                    tablet: _buildTabletView(theme, documents),
+                    desktop: _buildDesktopView(theme, documents),
+                  );
                 }
                 
                 return const Center(child: CircularProgressIndicator());
@@ -138,8 +139,7 @@ class _DocumentsListScreenState extends State<DocumentsListScreen> {
   }
 
   Widget _buildSearchAndFilters(ThemeData theme) {
-    return Container(
-      padding: const EdgeInsets.all(AppConstants.defaultPadding),
+    return ResponsiveContainer(
       child: Column(
         children: [
           SearchTextField(
@@ -150,7 +150,7 @@ class _DocumentsListScreenState extends State<DocumentsListScreen> {
               });
             },
           ),
-          const SizedBox(height: AppConstants.smallPadding),
+          SizedBox(height: AppConstants.smallPadding),
           _buildFilterChips(theme),
         ],
       ),
@@ -226,7 +226,7 @@ class _DocumentsListScreenState extends State<DocumentsListScreen> {
 
   Widget _buildMobileView(ThemeData theme, List<DocumentModel> documents) {
     return ListView.builder(
-      padding: const EdgeInsets.all(AppConstants.defaultPadding),
+      padding: EdgeInsets.all(ResponsiveUtils.getResponsivePadding(context)),
       itemCount: documents.length,
       itemBuilder: (context, index) {
         final document = documents[index];
@@ -237,7 +237,7 @@ class _DocumentsListScreenState extends State<DocumentsListScreen> {
 
   Widget _buildTabletView(ThemeData theme, List<DocumentModel> documents) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppConstants.defaultPadding),
+      padding: EdgeInsets.all(ResponsiveUtils.getResponsivePadding(context)),
       child: DataTable(
         columns: [
           DataColumn(label: Text(AppLocalizations.of(context)!.clientName)),
@@ -248,6 +248,27 @@ class _DocumentsListScreenState extends State<DocumentsListScreen> {
           DataColumn(label: Text(AppLocalizations.of(context)!.actions)),
         ],
         rows: documents.map((document) => _buildDataTableRow(theme, document)).toList(),
+      ),
+    );
+  }
+
+  Widget _buildDesktopView(ThemeData theme, List<DocumentModel> documents) {
+    return ResponsiveContainer(
+      child: SingleChildScrollView(
+        child: DataTable(
+          columnSpacing: ResponsiveUtils.getResponsivePadding(context),
+          columns: [
+            DataColumn(label: Text(AppLocalizations.of(context)!.clientName)),
+            DataColumn(label: Text(AppLocalizations.of(context)!.documentType)),
+            DataColumn(label: Text(AppLocalizations.of(context)!.status)),
+            DataColumn(label: Text(AppLocalizations.of(context)!.documentSize)),
+            DataColumn(label: Text(AppLocalizations.of(context)!.documentDate)),
+            DataColumn(label: Text('Case')),
+            DataColumn(label: Text('Tags')),
+            DataColumn(label: Text(AppLocalizations.of(context)!.actions)),
+          ],
+          rows: documents.map((document) => _buildDesktopDataTableRow(theme, document)).toList(),
+        ),
       ),
     );
   }
@@ -294,6 +315,66 @@ class _DocumentsListScreenState extends State<DocumentsListScreen> {
               IconButton(
                 icon: const Icon(Icons.delete),
                 onPressed: () => _deleteDocument(document),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  DataRow _buildDesktopDataTableRow(ThemeData theme, DocumentModel document) {
+    return DataRow(
+      cells: [
+        DataCell(
+          Row(
+            children: [
+              Icon(
+                _getDocumentIcon(document),
+                size: 20,
+                color: theme.colorScheme.primary,
+              ),
+              const SizedBox(width: AppConstants.smallPadding),
+              Expanded(
+                child: Text(
+                  document.name,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        DataCell(Text(document.typeDisplayText)),
+        DataCell(_buildStatusChip(theme, document.status)),
+        DataCell(Text(document.fileSizeFormatted)),
+        DataCell(Text(document.createdAtFormatted)),
+        DataCell(Text(document.caseId ?? 'N/A')),
+        DataCell(Text(document.tags.join(', '))),
+        DataCell(
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.visibility),
+                onPressed: () => _viewDocument(document),
+                tooltip: 'View',
+              ),
+              IconButton(
+                icon: const Icon(Icons.download),
+                onPressed: () => _downloadDocument(document),
+                tooltip: 'Download',
+              ),
+              IconButton(
+                icon: const Icon(Icons.edit),
+                onPressed: () => _editDocument(document),
+                tooltip: 'Edit',
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete),
+                onPressed: () => _deleteDocument(document),
+                tooltip: 'Delete',
               ),
             ],
           ),

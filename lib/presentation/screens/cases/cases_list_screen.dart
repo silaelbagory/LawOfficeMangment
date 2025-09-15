@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:lawofficemanagementsystem/core/services/firestore_service.dart';
 
 import '../../../core/utils/constants.dart';
+import '../../../core/utils/responsive_utils.dart';
 import '../../../data/models/case_model.dart';
 import '../../../data/models/user_model.dart';
 import '../../../logic/auth_cubit/auth_cubit.dart';
@@ -55,8 +57,6 @@ class _CasesListScreenState extends State<CasesListScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final size = MediaQuery.of(context).size;
-    final isTablet = size.width > AppConstants.mobileBreakpoint;
 
     return Scaffold(
       appBar: AppBar(
@@ -120,9 +120,11 @@ class _CasesListScreenState extends State<CasesListScreen> {
                     return _buildEmptyState(theme);
                   }
 
-                  return isTablet
-                      ? _buildTabletView(theme, cases)
-                      : _buildMobileView(theme, cases);
+                  return ResponsiveWidget(
+                    mobile: _buildMobileView(theme, cases),
+                    tablet: _buildTabletView(theme, cases),
+                    desktop: _buildDesktopView(theme, cases),
+                  );
                 }
                 
                 return const Center(child: CircularProgressIndicator());
@@ -139,8 +141,7 @@ class _CasesListScreenState extends State<CasesListScreen> {
   }
 
   Widget _buildSearchAndFilters(ThemeData theme) {
-    return Container(
-      padding: const EdgeInsets.all(AppConstants.defaultPadding),
+    return ResponsiveContainer(
       child: Column(
         children: [
           SearchTextField(
@@ -151,7 +152,7 @@ class _CasesListScreenState extends State<CasesListScreen> {
               });
             },
           ),
-          const SizedBox(height: AppConstants.smallPadding),
+          SizedBox(height: AppConstants.smallPadding),
           _buildFilterChips(theme),
         ],
       ),
@@ -227,7 +228,7 @@ class _CasesListScreenState extends State<CasesListScreen> {
 
   Widget _buildMobileView(ThemeData theme, List<CaseModel> cases) {
     return ListView.builder(
-      padding: const EdgeInsets.all(AppConstants.defaultPadding),
+      padding: EdgeInsets.all(ResponsiveUtils.getResponsivePadding(context)),
       itemCount: cases.length,
       itemBuilder: (context, index) {
         final caseModel = cases[index];
@@ -238,7 +239,7 @@ class _CasesListScreenState extends State<CasesListScreen> {
 
   Widget _buildTabletView(ThemeData theme, List<CaseModel> cases) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppConstants.defaultPadding),
+      padding: EdgeInsets.all(ResponsiveUtils.getResponsivePadding(context)),
       child: DataTable(
         columns: [
           DataColumn(label: Text(AppLocalizations.of(context)!.title)),
@@ -253,18 +254,55 @@ class _CasesListScreenState extends State<CasesListScreen> {
     );
   }
 
+  Widget _buildDesktopView(ThemeData theme, List<CaseModel> cases) {
+    return ResponsiveContainer(
+      child: SingleChildScrollView(
+        child: DataTable(
+          columnSpacing: ResponsiveUtils.getResponsivePadding(context),
+          columns: [
+            DataColumn(label: Text(AppLocalizations.of(context)!.title)),
+            DataColumn(label: Text(AppLocalizations.of(context)!.client)),
+            DataColumn(label: Text(AppLocalizations.of(context)!.status)),
+            DataColumn(label: Text(AppLocalizations.of(context)!.priority)),
+            DataColumn(label: Text(AppLocalizations.of(context)!.dueDate)),
+            DataColumn(label: Text(AppLocalizations.of(context)!.hearingDate)),
+            DataColumn(label: Text(AppLocalizations.of(context)!.actions)),
+          ],
+          rows: cases.map((caseModel) => _buildDesktopDataTableRow(theme, caseModel)).toList(),
+        ),
+      ),
+    );
+  }
+
   DataRow _buildDataTableRow(ThemeData theme, CaseModel caseModel) {
+    final firestoreService = FirestoreService();
     return DataRow(
       cells: [
         DataCell(
           Text(
-            caseModel.title,
+           caseModel.title,
             style: theme.textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w600,
             ),
           ),
         ),
-        DataCell(Text(caseModel.clientId ?? AppLocalizations.of(context)!.noClient)),
+DataCell(
+  FutureBuilder<String?>(
+    future: firestoreService.getClientNameById(caseModel.clientId ?? ''),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return const Text("Loading..."); // show loading text
+      }
+      if (snapshot.hasError) {
+        return const Text("Error");
+      }
+      if (!snapshot.hasData || snapshot.data == null) {
+        return Text(AppLocalizations.of(context)!.noClient);
+      }
+      return Text(snapshot.data!);
+    },
+  ),
+),
         DataCell(_buildStatusChip(theme, caseModel.status)),
         DataCell(_buildPriorityChip(theme, caseModel.priority)),
         DataCell(Text(caseModel.dueDateFormatted)),
@@ -279,6 +317,48 @@ class _CasesListScreenState extends State<CasesListScreen> {
               IconButton(
                 icon: const Icon(Icons.delete),
                 onPressed: () => _deleteCase(caseModel),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  DataRow _buildDesktopDataTableRow(ThemeData theme, CaseModel caseModel) {
+    return DataRow(
+      cells: [
+        DataCell(
+          Text(
+            caseModel.title,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        DataCell(Text(caseModel.clientId ?? AppLocalizations.of(context)!.noClient)),
+        DataCell(_buildStatusChip(theme, caseModel.status)),
+        DataCell(_buildPriorityChip(theme, caseModel.priority)),
+        DataCell(Text(caseModel.dueDateFormatted)),
+        DataCell(Text(caseModel.hearingDate?.toString() ?? 'N/A')),
+        DataCell(
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.visibility),
+                onPressed: () => _viewCase(caseModel),
+                tooltip: 'View',
+              ),
+              IconButton(
+                icon: const Icon(Icons.edit),
+                onPressed: () => _editCase(caseModel),
+                tooltip: 'Edit',
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete),
+                onPressed: () => _deleteCase(caseModel),
+                tooltip: 'Delete',
               ),
             ],
           ),

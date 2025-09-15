@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../core/utils/constants.dart';
+import '../../../core/utils/responsive_utils.dart';
 import '../../../core/utils/validators.dart';
 import '../../../data/models/client_model.dart';
 import '../../../data/models/user_model.dart';
@@ -105,25 +106,26 @@ class _AddClientScreenState extends State<AddClientScreen> {
             );
           }
         },
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppConstants.defaultPadding),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildBasicInfoSection(theme),
-                const SizedBox(height: AppConstants.largePadding),
-                _buildContactInfoSection(theme),
-                const SizedBox(height: AppConstants.largePadding),
-                _buildAddressSection(theme),
-                const SizedBox(height: AppConstants.largePadding),
-                _buildCompanyInfoSection(theme),
-                const SizedBox(height: AppConstants.largePadding),
-                _buildAdditionalInfoSection(theme),
-                const SizedBox(height: AppConstants.largePadding),
-                _buildActionButtons(theme),
-              ],
+        child: ResponsiveContainer(
+          child: SingleChildScrollView(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildBasicInfoSection(theme),
+                  SizedBox(height: ResponsiveUtils.getResponsivePadding(context)),
+                  _buildContactInfoSection(theme),
+                  SizedBox(height: ResponsiveUtils.getResponsivePadding(context)),
+                  _buildAddressSection(theme),
+                  SizedBox(height: ResponsiveUtils.getResponsivePadding(context)),
+                  _buildCompanyInfoSection(theme),
+                  SizedBox(height: ResponsiveUtils.getResponsivePadding(context)),
+                  _buildAdditionalInfoSection(theme),
+                  SizedBox(height: ResponsiveUtils.getResponsivePadding(context)),
+                  _buildActionButtons(theme),
+                ],
+              ),
             ),
           ),
         ),

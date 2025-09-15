@@ -11,6 +11,7 @@ import 'package:lawofficemanagementsystem/presentation/screens/documents/documen
 import 'package:lawofficemanagementsystem/presentation/screens/documents/upload_document_screen.dart';
 import 'package:lawofficemanagementsystem/presentation/screens/users/users_management_screen.dart';
 import 'package:lawofficemanagementsystem/presentation/widgets/drawer_screens.dart';
+import 'package:lawofficemanagementsystem/presentation/widgets/logout_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -41,7 +42,7 @@ Future<void> main() async {
   Intl.defaultLocale = 'ar';
    await Supabase.initialize(
     url: 'https://kfimwgwogtzosvitugqn.supabase.co',
-    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtmaW13Z3dvZ3R6b3N2aXR1Z3FuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM3NzkyMDUsImV4cCI6MjA2OTM1NTIwNX0.plrYINp8TwApBb3jHtZGlytgn7XDdRsdpJRRQsc7S0k',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzeG5zYWljcnJrZWtqdGpibGJ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc3MDY3NjgsImV4cCI6MjA3MzI4Mjc2OH0.Ed5gab8du0sEt63M8H4RZesu0WXNLMYNh2SdjzW2A2Y',
   );
   //FirestoreService _firestoreService=FirestoreService();
   final firestoreService = FirestoreService();
@@ -137,7 +138,8 @@ class _LawOfficeAppState extends State<LawOfficeApp> {
     await prefs.setString('language', language);
   }
 
-  void _logout() {
+  void _logout()async {
+   LogoutDialog().showLogoutDialog(context);
     setState(() => isLoggedIn = false);
   }
 

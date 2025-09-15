@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lawofficemanagementsystem/data/models/user_model.dart';
+import 'package:lawofficemanagementsystem/logic/auth_cubit/auth_cubit.dart';
+import 'package:lawofficemanagementsystem/presentation/widgets/logout_dialog.dart';
 
 class ResponsiveBuilder extends StatelessWidget {
   final Widget child;
@@ -257,6 +261,9 @@ class AppDrawer extends StatelessWidget {
   });
   @override
   Widget build(BuildContext context) {
+    final user = context.read<AuthCubit>().currentUser;
+    //     final userPermissions = UserPermissions();
+
     return Drawer(
       child: Column(
         children: [
@@ -273,7 +280,7 @@ class AppDrawer extends StatelessWidget {
               );
             },
           ),
-          ListTile(
+    user!.hasPermission('casesRead')?      ListTile(
             leading: const Icon(Icons.folder),
             title: const Text('Cases'),
             onTap: () {
@@ -283,7 +290,8 @@ class AppDrawer extends StatelessWidget {
                '/cases'
               );
             },
-          ),
+          ):SizedBox.shrink(),
+          user.hasPermission('clientsRead')?
           ListTile(
             leading: const Icon(Icons.people),
             title: const Text('Clients'),
@@ -294,7 +302,8 @@ class AppDrawer extends StatelessWidget {
                '/clients'
               );
             },
-          ),
+          ):SizedBox.shrink(),
+        user.hasPermission("documentsRead")?
           ListTile(
             leading: const Icon(Icons.description),
             title: const Text('Documents'),
@@ -306,8 +315,8 @@ class AppDrawer extends StatelessWidget {
               );
               
             },
-          ),
-          ListTile(
+          ):SizedBox.shrink(),
+user.hasPermission('usersWrite')   ?       ListTile(
             leading: const Icon(Icons.description),
             title: const Text('Add Lawyer'),
             onTap: () {
@@ -318,7 +327,7 @@ class AppDrawer extends StatelessWidget {
               );
               
             },
-          ),
+          ):SizedBox.shrink(),
           const Divider(),
           if (onThemeChanged != null)
             ListTile(
@@ -345,8 +354,9 @@ class AppDrawer extends StatelessWidget {
               leading: const Icon(Icons.logout),
               title: const Text('Logout'),
               onTap: () {
-                Navigator.pop(context);
-                onLogout!();
+              Navigator.pop(context);
+              LogoutDialog().showLogoutDialog(context);
+               
               },
             ),
         ],

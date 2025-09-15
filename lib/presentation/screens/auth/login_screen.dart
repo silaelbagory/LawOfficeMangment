@@ -5,6 +5,7 @@ import 'package:lawofficemanagementsystem/core/utils/them_background.dart';
 import 'package:lawofficemanagementsystem/presentation/widgets/custom_button.dart';
 
 import '../../../core/utils/constants.dart';
+import '../../../core/utils/responsive_utils.dart';
 import '../../../core/utils/validators.dart';
 import '../../../logic/auth_cubit/auth_cubit.dart';
 import '../../../logic/auth_cubit/auth_state.dart';
@@ -34,8 +35,6 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final size = MediaQuery.of(context).size;
-    final isTablet = size.width > AppConstants.mobileBreakpoint;
 
     return ThemedBackground(
       child: Scaffold(
@@ -55,20 +54,17 @@ class _LoginScreenState extends State<LoginScreen> {
           },
           child: SafeArea(
             child: Center(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(AppConstants.largePadding),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: isTablet ? 400 : double.infinity,
-                  ),
+              child: ResponsiveContainer(
+                maxWidth: ResponsiveUtils.getFormFieldWidth(context),
+                child: SingleChildScrollView(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       _buildHeader(theme),
-                      const SizedBox(height: AppConstants.largePadding * 2),
+                      SizedBox(height: ResponsiveUtils.getResponsivePadding(context) * 2),
                       _buildLoginForm(theme),
-                      const SizedBox(height: AppConstants.largePadding),
+                      SizedBox(height: ResponsiveUtils.getResponsivePadding(context)),
                       _buildFooter(theme),
                     ],
                   ),
@@ -85,31 +81,59 @@ class _LoginScreenState extends State<LoginScreen> {
     return Column(
       children: [
         Container(
-          width: 80,
-          height: 80,
+          width: ResponsiveUtils.getResponsiveValue(
+            context,
+            mobile: 80.0,
+            tablet: 100.0,
+            desktop: 120.0,
+          ),
+          height: ResponsiveUtils.getResponsiveValue(
+            context,
+            mobile: 80.0,
+            tablet: 100.0,
+            desktop: 120.0,
+          ),
           decoration: BoxDecoration(
             color: theme.colorScheme.primary,
             borderRadius: BorderRadius.circular(20),
           ),
           child: Icon(
             Icons.login,
-            size: 40,
+            size: ResponsiveUtils.getResponsiveValue(
+              context,
+              mobile: 40.0,
+              tablet: 50.0,
+              desktop: 60.0,
+            ),
             color: theme.colorScheme.onPrimary,
           ),
         ),
-        const SizedBox(height: AppConstants.largePadding),
+        SizedBox(height: ResponsiveUtils.getResponsivePadding(context)),
         Text(
            AppLocalizations.of(context)!.login,
           style: theme.textTheme.headlineMedium?.copyWith(
+            
             fontWeight: FontWeight.bold,
             color: theme.colorScheme.onSurface,
+            fontSize: ResponsiveUtils.getResponsiveFontSize(
+              context,
+              mobile: 24.0,
+              tablet: 28.0,
+              desktop: 32.0,
+            ),
           ),
         ),
-        const SizedBox(height: AppConstants.smallPadding),
+        SizedBox(height: AppConstants.smallPadding),
         Text(
           AppLocalizations.of(context)!.welcomeBackTo(AppLocalizations.of(context)!.appTitle),
           style: theme.textTheme.bodyLarge?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
+            fontSize: ResponsiveUtils.getResponsiveFontSize(
+              context,
+              mobile: 14.0,
+              tablet: 16.0,
+              desktop: 18.0,
+            ),
           ),
           textAlign: TextAlign.center,
         ),
@@ -139,7 +163,7 @@ class _LoginScreenState extends State<LoginScreen> {
           const SizedBox(height: AppConstants.largePadding),
           _buildLoginButton(theme),
           const SizedBox(height: AppConstants.defaultPadding),
-          _buildGoogleSignInButton(theme),
+     //     _buildGoogleSignInButton(theme),
         ],
       ),
     );
@@ -186,6 +210,7 @@ class _LoginScreenState extends State<LoginScreen> {
           onPressed: state is AuthLoading ? null : _handleLogin,
           isLoading: state is AuthLoading,
           size: ButtonSize.large,
+          width: double.infinity,
         );
       },
     );
@@ -196,10 +221,12 @@ class _LoginScreenState extends State<LoginScreen> {
       builder: (context, state) {
         return OutlineButton(
           text: AppLocalizations.of(context)!.signInWithGoogle,
-          icon: Icons.login,
+       //   icon: Icons.login,
           onPressed: state is AuthLoading ? null : _handleGoogleSignIn,
           isLoading: state is AuthLoading,
           size: ButtonSize.large,
+          
+          width: double.infinity,
         );
       },
     );

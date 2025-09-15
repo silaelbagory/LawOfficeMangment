@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:go_router/go_router.dart';
 import 'package:lawofficemanagementsystem/core/utils/them_background.dart';
 
 import '../../../core/utils/constants.dart';
+import '../../../core/utils/responsive_utils.dart';
 import '../../../core/utils/validators.dart';
 import '../../../data/models/user_model.dart';
 import '../../../logic/user_cubit/user_cubit.dart';
@@ -72,19 +72,20 @@ class _AddLawyerScreenState extends State<AddLawyerScreen> {
               );
             }
           },
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(AppConstants.defaultPadding),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _buildBasicInfoSection(theme),
-                  const SizedBox(height: AppConstants.largePadding),
-                  _buildPermissionsSection(theme),
-                  const SizedBox(height: AppConstants.largePadding),
-                  _buildActionButtons(theme),
-                ],
+          child: ResponsiveContainer(
+            child: SingleChildScrollView(
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildBasicInfoSection(theme),
+                    SizedBox(height: ResponsiveUtils.getResponsivePadding(context)),
+                    _buildPermissionsSection(theme),
+                    SizedBox(height: ResponsiveUtils.getResponsivePadding(context)),
+                    _buildActionButtons(theme),
+                  ],
+                ),
               ),
             ),
           ),

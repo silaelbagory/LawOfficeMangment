@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/utils/constants.dart';
+import '../../../core/utils/responsive_utils.dart';
 import '../../../core/utils/validators.dart';
 import '../../../logic/auth_cubit/auth_cubit.dart';
 import '../../../logic/auth_cubit/auth_state.dart';
@@ -42,8 +42,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final size = MediaQuery.of(context).size;
-    final isTablet = size.width > AppConstants.mobileBreakpoint;
 
     return Scaffold(
       body: BlocListener<AuthCubit, AuthState>(
@@ -76,20 +74,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
         },
         child: SafeArea(
           child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(AppConstants.largePadding),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: isTablet ? 400 : double.infinity,
-                ),
+            child: ResponsiveContainer(
+              maxWidth: ResponsiveUtils.getFormFieldWidth(context),
+              child: SingleChildScrollView(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     _buildHeader(theme),
-                    const SizedBox(height: AppConstants.largePadding * 2),
+                    SizedBox(height: ResponsiveUtils.getResponsivePadding(context) * 2),
                     _buildRegisterForm(theme),
-                    const SizedBox(height: AppConstants.largePadding),
+                    SizedBox(height: ResponsiveUtils.getResponsivePadding(context)),
                     _buildFooter(theme),
                   ],
                 ),
@@ -253,24 +248,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
           onPressed: state is AuthLoading ? null : _handleRegister,
           isLoading: state is AuthLoading,
           size: ButtonSize.large,
+          width: double.infinity,
         );
       },
     );
   }
 
-  Widget _buildGoogleSignInButton(ThemeData theme) {
-    return BlocBuilder<AuthCubit, AuthState>(
-      builder: (context, state) {
-        return OutlineButton(
-          text: 'Sign up with Google',
-          icon: Icons.login,
-          onPressed: state is AuthLoading ? null : _handleGoogleSignIn,
-          isLoading: state is AuthLoading,
-          size: ButtonSize.large,
-        );
-      },
-    );
-  }
 
   Widget _buildFooter(ThemeData theme) {
     return Column(
@@ -316,7 +299,4 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
-  void _handleGoogleSignIn() {
-    context.read<AuthCubit>().signInWithGoogle();
-  }
 }

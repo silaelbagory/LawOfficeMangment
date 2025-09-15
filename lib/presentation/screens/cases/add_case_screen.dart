@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../core/utils/constants.dart';
+import '../../../core/utils/responsive_utils.dart';
 import '../../../core/utils/validators.dart';
 import '../../../data/models/case_model.dart';
 import '../../../data/models/client_model.dart';
@@ -109,23 +110,24 @@ class _AddCaseScreenState extends State<AddCaseScreen> {
             },
           ),
         ],
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppConstants.defaultPadding),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildBasicInfoSection(theme),
-                const SizedBox(height: AppConstants.largePadding),
-                _buildCaseDetailsSection(theme),
-                const SizedBox(height: AppConstants.largePadding),
-                _buildLegalDetailsSection(theme),
-                const SizedBox(height: AppConstants.largePadding),
-                _buildAdditionalInfoSection(theme),
-                const SizedBox(height: AppConstants.largePadding),
-                _buildActionButtons(theme),
-              ],
+        child: ResponsiveContainer(
+          child: SingleChildScrollView(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildBasicInfoSection(theme),
+                  SizedBox(height: ResponsiveUtils.getResponsivePadding(context)),
+                  _buildCaseDetailsSection(theme),
+                  SizedBox(height: ResponsiveUtils.getResponsivePadding(context)),
+                  _buildLegalDetailsSection(theme),
+                  SizedBox(height: ResponsiveUtils.getResponsivePadding(context)),
+                  _buildAdditionalInfoSection(theme),
+                  SizedBox(height: ResponsiveUtils.getResponsivePadding(context)),
+                  _buildActionButtons(theme),
+                ],
+              ),
             ),
           ),
         ),
@@ -146,7 +148,7 @@ class _AddCaseScreenState extends State<AddCaseScreen> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            const SizedBox(height: AppConstants.defaultPadding),
+            SizedBox(height: AppConstants.defaultPadding),
             CustomTextField(
               label: AppLocalizations.of(context)!.caseTitle,
               hint: AppLocalizations.of(context)!.enterCaseTitle,
@@ -154,7 +156,7 @@ class _AddCaseScreenState extends State<AddCaseScreen> {
               validator: Validators.validateCaseTitle,
               isRequired: true,
             ),
-            const SizedBox(height: AppConstants.defaultPadding),
+            SizedBox(height: AppConstants.defaultPadding),
             MultilineTextField(
               label: AppLocalizations.of(context)!.caseDescription,
               hint: AppLocalizations.of(context)!.enterCaseDescription,
@@ -163,7 +165,7 @@ class _AddCaseScreenState extends State<AddCaseScreen> {
               isRequired: true,
               maxLines: 4,
             ),
-            const SizedBox(height: AppConstants.defaultPadding),
+            SizedBox(height: AppConstants.defaultPadding),
             DropdownButtonFormField<String?>(
               value: _selectedClientId,
               decoration: const InputDecoration(
@@ -186,13 +188,13 @@ class _AddCaseScreenState extends State<AddCaseScreen> {
                 });
               },
             ),
-            const SizedBox(height: AppConstants.defaultPadding),
-            Row(
-              children: [
-                Expanded(
-                  child: DropdownButtonFormField<CaseStatus>(
+            SizedBox(height: AppConstants.defaultPadding),
+            ResponsiveWidget(
+              mobile: Column(
+                children: [
+                  DropdownButtonFormField<CaseStatus>(
                     value: _selectedStatus,
-                    decoration:  InputDecoration(
+                    decoration: InputDecoration(
                       labelText: AppLocalizations.of(context)!.caseStatus,
                       border: OutlineInputBorder(),
                     ),
@@ -208,12 +210,10 @@ class _AddCaseScreenState extends State<AddCaseScreen> {
                       });
                     },
                   ),
-                ),
-                const SizedBox(width: AppConstants.defaultPadding),
-                Expanded(
-                  child: DropdownButtonFormField<CasePriority>(
+                  SizedBox(height: AppConstants.defaultPadding),
+                  DropdownButtonFormField<CasePriority>(
                     value: _selectedPriority,
-                    decoration:  InputDecoration(
+                    decoration: InputDecoration(
                       labelText: AppLocalizations.of(context)!.casePriority,
                       border: OutlineInputBorder(),
                     ),
@@ -229,8 +229,53 @@ class _AddCaseScreenState extends State<AddCaseScreen> {
                       });
                     },
                   ),
-                ),
-              ],
+                ],
+              ),
+              tablet: Row(
+                children: [
+                  Expanded(
+                    child: DropdownButtonFormField<CaseStatus>(
+                      value: _selectedStatus,
+                      decoration: InputDecoration(
+                        labelText: AppLocalizations.of(context)!.caseStatus,
+                        border: OutlineInputBorder(),
+                      ),
+                      items: CaseStatus.values.map((status) {
+                        return DropdownMenuItem(
+                          value: status,
+                          child: Text(status.displayText),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedStatus = value ?? CaseStatus.open;
+                        });
+                      },
+                    ),
+                  ),
+                  SizedBox(width: AppConstants.defaultPadding),
+                  Expanded(
+                    child: DropdownButtonFormField<CasePriority>(
+                      value: _selectedPriority,
+                      decoration: InputDecoration(
+                        labelText: AppLocalizations.of(context)!.casePriority,
+                        border: OutlineInputBorder(),
+                      ),
+                      items: CasePriority.values.map((priority) {
+                        return DropdownMenuItem(
+                          value: priority,
+                          child: Text(priority.displayText),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _selectedPriority = value ?? CasePriority.medium;
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),

@@ -6,6 +6,7 @@ import 'package:lawofficemanagementsystem/logic/auth_cubit/auth_state.dart';
 import 'package:lawofficemanagementsystem/presentation/screens/auth/login_screen.dart';
 
 import '../../../core/utils/constants.dart';
+import '../../../core/utils/responsive_utils.dart';
 import '../../../data/models/user_model.dart';
 import '../../../logic/auth_cubit/auth_cubit.dart';
 import '../../../logic/case_cubit/case_cubit.dart';
@@ -51,23 +52,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final size = MediaQuery.of(context).size;
-    final isTablet = size.width > AppConstants.mobileBreakpoint;
-    final isDesktop = size.width > AppConstants.tabletBreakpoint;
 
     return ThemedBackground(
-      
       child: Scaffold(
         backgroundColor: Colors.transparent,
-      appBar: AppBar(
+        appBar: AppBar(
           title: Text(AppLocalizations.of(context)!.dashboard),
-        actions: [
+          actions: [
             IconButton(
               icon: const Icon(Icons.refresh),
               onPressed: _loadDashboardData,
             ),
-          IconButton(
-            icon: const Icon(Icons.logout),
+            IconButton(
+              icon: const Icon(Icons.logout),
               onPressed: () => _showLogoutDialog(),
             ),
           ],
@@ -81,19 +78,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
             
             return RefreshIndicator(
               onRefresh: () async => _loadDashboardData(),
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(AppConstants.defaultPadding),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildWelcomeSection(theme, user.name),
-                    const SizedBox(height: AppConstants.largePadding),
-                    _buildQuickActions(theme, isTablet),
-                    const SizedBox(height: AppConstants.largePadding),
-                    _buildStatisticsSection(theme, isTablet, isDesktop),
-                    const SizedBox(height: AppConstants.largePadding),
-                    _buildRecentActivity(theme, isTablet, isDesktop),
-                  ],
+              child: ResponsiveContainer(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildWelcomeSection(theme, user),
+                      SizedBox(height: ResponsiveUtils.getResponsivePadding(context)),
+                      _buildQuickActions(theme, user),
+                      SizedBox(height: ResponsiveUtils.getResponsivePadding(context)),
+                      _buildStatisticsSection(theme, user),
+                      SizedBox(height: ResponsiveUtils.getResponsivePadding(context)),
+                      _buildRecentActivity(theme, user),
+                    ],
+                  ),
                 ),
               ),
             );
@@ -103,7 +101,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildWelcomeSection(ThemeData theme, String userName) {
+  Widget _buildWelcomeSection(ThemeData theme, UserModel user) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppConstants.largePadding),
@@ -126,7 +124,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
               CircleAvatar(
                 radius: 28,
                 backgroundColor: theme.colorScheme.onPrimary.withOpacity(0.15),
-                child: Icon(Icons.person, size: 36, color: theme.colorScheme.onPrimary),
+                child: Icon(
+                  user.isManager ? Icons.admin_panel_settings : Icons.person, 
+                  size: 36, 
+                  color: theme.colorScheme.onPrimary
+                ),
               ),
               const SizedBox(width: AppConstants.largePadding),
               Expanded(
@@ -141,10 +143,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                     const SizedBox(height: AppConstants.smallPadding),
                     Text(
-                      userName,
+                      user.name,
                       style: theme.textTheme.headlineSmall?.copyWith(
                         color: theme.colorScheme.onPrimary,
                         fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.onPrimary.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        user.role.value.toUpperCase(),
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: theme.colorScheme.onPrimary,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ],
@@ -154,7 +171,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           const SizedBox(height: AppConstants.smallPadding),
           Text(
-            AppLocalizations.of(context)!.dashboardSubtitle,
+            user.isManager 
+              ? 'Manager Dashboard - Full Access'
+              : 'Lawyer Dashboard - Limited Access',
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.onPrimary.withOpacity(0.9),
             ),
@@ -164,62 +183,71 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildQuickActions(ThemeData theme, bool isTablet) {
+  Widget _buildQuickActions(ThemeData theme, UserModel user) {
     final actions = [
-    
       {
         'title': AppLocalizations.of(context)!.addCase,
         'icon': Icons.cases,
         'color': AppColors.caseOpen,
         'route': '/add-case',
-      }
-    ,
+        'permission': user.hasPermission('casesWrite'),
+      },
       {
         'title': AppLocalizations.of(context)!.documents,
         'icon': Icons.document_scanner,
         'color': const Color.fromARGB(255, 2, 24, 3),
         'route': '/document_list',
+        'permission': user.hasPermission('documentsRead'),
       },
       {
         'title': AppLocalizations.of(context)!.addLawyer,
         'icon': Icons.people_sharp,
         'color': const Color.fromARGB(255, 136, 220, 139),
         'route': '/add_lawyer',
+        'permission': user.hasPermission('usersWrite'),
       },
-       //  UserPermissions().clientsWrite?
-
-   
-      //     UserPermissions().documentsWrite?
-
       {
         'title': AppLocalizations.of(context)!.uploadDocument,
         'icon': Icons.upload,
         'color': AppColors.info,
         'route': '/upload-document',
-      },//:null,
-        //   UserPermissions().casesRead?
- {
+        'permission': user.hasPermission('documentsWrite'),
+      },
+      {
         'title': AppLocalizations.of(context)!.clients,
         'icon': Icons.people,
         'color': const Color.fromARGB(255, 95, 132, 163),
         'route': '/clients',
+        'permission': user.hasPermission('clientsRead'),
       },
       {
         'title': AppLocalizations.of(context)!.viewAllCases,
         'icon': Icons.visibility,
         'color': AppColors.warning,
         'route': '/cases',
+        'permission': user.hasPermission('casesRead'),
       },
-        {
+      {
         'title': AppLocalizations.of(context)!.actions,
-        'icon': Icons.visibility,
+        'icon': Icons.history,
         'color': const Color.fromARGB(255, 255, 0, 0),
-        'route': '/my_lawyers',
+        'route': '/users/actions',
+        'permission': user.hasPermission('usersRead') || user.isManager,
       },
-      
-
+      // Manager-specific actions
+      if (user.isManager) ...[
+        {
+          'title': 'Manage Lawyers',
+          'icon': Icons.people_outline,
+          'color': const Color.fromARGB(255, 76, 175, 80),
+          'route': '/my_lawyers',
+          'permission': true,
+        },
+       
+      ],
     ];
-
+ final filteredActions =
+      actions.where((action) => action['permission'] == true).toList();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -230,27 +258,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
         const SizedBox(height: AppConstants.defaultPadding),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: isTablet ? 4 : 2,
-            crossAxisSpacing: AppConstants.defaultPadding,
-            mainAxisSpacing: AppConstants.defaultPadding,
-            childAspectRatio: 1.2,
-          ),
-          itemCount: actions.length,
-          itemBuilder: (context, index) {
-            final action = actions[index];
-            return _buildActionCard(
-              theme,
-              action['title'] as String,
-              action['icon'] as IconData,
-              action['color'] as Color,
-              action['route'] as String,
-            );
-
-          },
+        ResponsiveGrid(
+          children: filteredActions.map((action) => _buildActionCard(
+            theme,
+            action['title'] as String,
+            action['icon'] as IconData,
+            action['color'] as Color,
+            action['route'] as String,
+          )).toList(),
         ),
       ],
     );
@@ -302,7 +317,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildStatisticsSection(ThemeData theme, bool isTablet, bool isDesktop) {
+  Widget _buildStatisticsSection(ThemeData theme, UserModel user) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -313,50 +328,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
         const SizedBox(height: AppConstants.defaultPadding),
-        Row(
+        ResponsiveGrid(
           children: [
-            Expanded(
-              child: _buildStatCard(
-                theme,
-                AppLocalizations.of(context)!.cases,
-                Icons.folder,
-                AppColors.caseOpen,
-                () => context.read<CaseCubit>().currentStatistics,
-              ),
+            _buildStatCard(
+              theme,
+              AppLocalizations.of(context)!.cases,
+              Icons.folder,
+              AppColors.caseOpen,
+              () => context.read<CaseCubit>().currentStatistics,
             ),
-            const SizedBox(width: AppConstants.defaultPadding),
-            Expanded(
-              child: _buildStatCard(
-                theme,
-                AppLocalizations.of(context)!.clients,
-                Icons.people,
-                AppColors.primaryLight,
-                () => context.read<ClientCubit>().currentStatistics,
-              ),
+            _buildStatCard(
+              theme,
+              AppLocalizations.of(context)!.clients,
+              Icons.people,
+              AppColors.primaryLight,
+              () => context.read<ClientCubit>().currentStatistics,
             ),
-          ],
-        ),
-        const SizedBox(height: AppConstants.defaultPadding),
-        Row(
-          children: [
-            Expanded(
-              child: _buildStatCard(
-                theme,
-                AppLocalizations.of(context)!.documents,
-                Icons.description,
-                AppColors.info,
-                () => context.read<DocumentCubit>().currentStatistics,
-              ),
+            _buildStatCard(
+              theme,
+              AppLocalizations.of(context)!.documents,
+              Icons.description,
+              AppColors.info,
+              () => context.read<DocumentCubit>().currentStatistics,
             ),
-            const SizedBox(width: AppConstants.defaultPadding),
-              Expanded(
-              child: _buildStatCard(
-                theme,
-                AppLocalizations.of(context)!.revenue,
-                Icons.priority_high,
-                AppColors.success,
-                () => {'total': 0, 'thisMonth': 0, 'lastMonth': 0},
-              ),
+            _buildStatCard(
+              theme,
+              AppLocalizations.of(context)!.revenue,
+              Icons.priority_high,
+              AppColors.success,
+              () => {'total': 0, 'thisMonth': 0, 'lastMonth': 0},
             ),
           ],
         ),
@@ -423,7 +423,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildRecentActivity(ThemeData theme, bool isTablet, bool isDesktop) {
+  Widget _buildRecentActivity(ThemeData theme, UserModel user) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

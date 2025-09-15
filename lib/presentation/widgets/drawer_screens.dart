@@ -6,7 +6,6 @@ import 'package:lawofficemanagementsystem/presentation/screens/dashboard/dashboa
 import 'package:lawofficemanagementsystem/presentation/screens/documents/documents_list_screen.dart';
 import 'package:lawofficemanagementsystem/presentation/screens/users/add_lawyer_screen.dart';
 
-import '../screens/users/add_lawyer_screen.dart';
  // Your ResponsiveBuilder + AppDrawer
 
 class MainScaffold extends StatelessWidget {
