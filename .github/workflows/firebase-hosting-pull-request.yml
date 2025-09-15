@@ -15,11 +15,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # ✅ Install Flutter
+      # ✅ Install Flutter (compatible with Dart 3.7.2)
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.27.1'
           channel: 'stable'
+          cache: true
 
       # ✅ Build project
       - run: flutter pub get
