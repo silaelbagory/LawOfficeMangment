@@ -16,7 +16,7 @@ jobs:
       # ✅ Install Flutter (compatible with Dart 3.7.2)
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.3'
+          flutter-version: '3.29.2'
           channel: 'stable'
           cache: true
 
