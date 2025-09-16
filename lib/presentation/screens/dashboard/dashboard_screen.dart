@@ -281,7 +281,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           borderRadius: BorderRadius.circular(AppConstants.borderRadius),
         ),
         child: InkWell(
-          onTap: () => Navigator.pushNamed(context,route),
+          onTap: () => Navigator.pushReplacementNamed(context,route),
           borderRadius: BorderRadius.circular(AppConstants.borderRadius),
           child: Padding(
             padding: const EdgeInsets.all(AppConstants.defaultPadding),
@@ -437,7 +437,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
             TextButton(
-              onPressed: () => Navigator.pushNamed(context,'/cases'),
+              onPressed: () => Navigator.pushReplacementNamed(context,'/cases'),
               child: Text(AppLocalizations.of(context)!.viewAll),
             ),
           ],
