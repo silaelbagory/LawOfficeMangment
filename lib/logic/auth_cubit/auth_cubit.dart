@@ -52,27 +52,47 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   // Sign in with email and password
-  Future<void> signInWithEmailAndPassword({
-    required String email,
-    required String password,
-  }) async {
-    try {
-      emit(AuthLoading());
-      
-      final user = await _authRepository.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      
-      if (user != null) {
-        emit(AuthAuthenticated(user));
-      } else {
-        emit(AuthError('Sign in failed. Please check your credentials.'));
+// Sign in with email and password
+Future<void> signInWithEmailAndPassword({
+  required String email,
+  required String password,
+}) async {
+  try {
+    emit(AuthLoading());
+
+    final user = await _authRepository.signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+
+    if (user != null) {
+      // ✅ جِيب بيانات المستخدم من الـ repository
+      final userData = await _userRepository.getUser(user.id);
+
+      if (userData == null) {
+        emit(AuthError('User data not found.'));
+        return;
       }
-    } catch (e) {
-      emit(AuthError('Sign in failed: $e'));
+
+      // ✅ تحقق إذا كان محامي وغير active
+      if (userData.role == UserRole.lawyer && userData.isActive == false) {
+        emit(AuthError(
+          'You are not active. Please ask your manager  to activate your account.',
+        ));
+        await _authRepository.signOut();
+        return;
+      }
+
+      // ✅ لو كل شيء تمام
+      emit(AuthAuthenticated(userData));
+    } else {
+      emit(AuthError('Sign in failed. Please check your credentials.'));
     }
+  } catch (e) {
+    emit(AuthError('Sign in failed: $e'));
   }
+}
+
 
   // Create user account (for signup)
   Future<void> createUserAccount({

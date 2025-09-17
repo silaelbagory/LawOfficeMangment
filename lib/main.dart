@@ -9,6 +9,7 @@ import 'package:lawofficemanagementsystem/presentation/screens/cases/add_case_sc
 import 'package:lawofficemanagementsystem/presentation/screens/clients/add_client_screen.dart';
 import 'package:lawofficemanagementsystem/presentation/screens/documents/documents_list_screen.dart';
 import 'package:lawofficemanagementsystem/presentation/screens/documents/upload_document_screen.dart';
+import 'package:lawofficemanagementsystem/presentation/screens/managers/manager_lawers.dart';
 import 'package:lawofficemanagementsystem/presentation/screens/users/users_management_screen.dart';
 import 'package:lawofficemanagementsystem/presentation/widgets/drawer_screens.dart';
 import 'package:lawofficemanagementsystem/presentation/widgets/logout_dialog.dart';

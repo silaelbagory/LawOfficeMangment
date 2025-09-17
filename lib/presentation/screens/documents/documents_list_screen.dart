@@ -55,7 +55,7 @@ class _DocumentsListScreenState extends State<DocumentsListScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
+final user=context.read<AuthCubit>().currentUser;
     return Scaffold(
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.documents),
@@ -131,10 +131,10 @@ class _DocumentsListScreenState extends State<DocumentsListScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton:user!.hasPermission('documentsWrite')? FloatingActionButton(
         onPressed: () => Navigator.pushNamed(context,'/upload-document'),
         child: const Icon(Icons.upload),
-      ),
+      ):SizedBox.shrink(),
     );
   }
 
@@ -193,6 +193,7 @@ class _DocumentsListScreenState extends State<DocumentsListScreen> {
   }
 
   Widget _buildEmptyState(ThemeData theme) {
+                        final user = context.read<AuthCubit>().currentUser;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -215,10 +216,10 @@ class _DocumentsListScreenState extends State<DocumentsListScreen> {
             ),
           ),
           const SizedBox(height: AppConstants.defaultPadding),
-          PrimaryButton(
+     user!.hasPermission('documentsWrite')?     PrimaryButton(
             text: AppLocalizations.of(context)!.uploadDocument,
             onPressed: () => Navigator.pushNamed(context,'/upload-document'),
-          ),
+          ):SizedBox.shrink(),
         ],
       ),
     );

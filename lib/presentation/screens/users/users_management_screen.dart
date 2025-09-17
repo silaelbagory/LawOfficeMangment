@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
+import 'package:lawofficemanagementsystem/core/services/firestore_service.dart';
 import 'package:lawofficemanagementsystem/presentation/screens/managers/lawyer_actions_screen.dart';
 import 'package:lawofficemanagementsystem/presentation/screens/managers/manager_lawers.dart';
 
@@ -146,7 +147,15 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
 
   Widget _buildDesktopView(List<UserModel> lawyers, ThemeData theme) {
     return ResponsiveContainer(
-      child: SingleChildScrollView(
+       child: ListView.builder(
+                padding: EdgeInsets.all(ResponsiveUtils.getResponsivePadding(context)),
+                itemCount: lawyers.length,
+                itemBuilder: (context, index) {
+                  final lawyer = lawyers[index];
+                  return _buildLawyerCard(lawyer, theme);
+                },
+              ),
+    /*  child: SingleChildScrollView(
         child: DataTable(
           columnSpacing: ResponsiveUtils.getResponsivePadding(context),
           columns: [
@@ -158,9 +167,10 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
             const DataColumn(label: Text('Actions')),
           ],
           rows: lawyers.map((lawyer) => _buildDesktopDataTableRow(lawyer, theme)).toList(),
-        ),
-      ),
-    );
+        ),*/
+
+      )
+    ;
   }
 
   DataRow _buildDataTableRow(UserModel lawyer, ThemeData theme) {
@@ -300,6 +310,7 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
 
   void _deleteLawyer(UserModel lawyer) {
     // Show confirmation dialog and delete lawyer
+    final firestoreService = FirestoreService();
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -313,9 +324,9 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
-              // TODO: Implement delete user functionality
+              firestoreService.deleteUser(lawyer.id);
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Delete functionality not implemented yet')),
+                SnackBar(content: Text('you deleted the lawyer')),
               );
             },
             child: Text('Delete'),

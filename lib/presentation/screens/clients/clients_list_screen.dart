@@ -27,7 +27,6 @@ class _ClientsListScreenState extends State<ClientsListScreen> {
   ClientType? _selectedType;
   String _sortBy = 'createdAt';
   bool _sortDescending = true;
-
   @override
   void initState() {
     super.initState();
@@ -56,6 +55,7 @@ class _ClientsListScreenState extends State<ClientsListScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+ final user = context.read<AuthCubit>().currentUser;
 
     return Scaffold(
       appBar: AppBar(
@@ -132,10 +132,11 @@ class _ClientsListScreenState extends State<ClientsListScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton:      user!.hasPermission('clientsWrite')?
+ FloatingActionButton(
         onPressed: () => Navigator.pushNamed(context,'/add-client'),
         child: const Icon(Icons.add),
-      ),
+      ):SizedBox.shrink(),
     );
   }
 
@@ -194,6 +195,7 @@ class _ClientsListScreenState extends State<ClientsListScreen> {
   }
 
   Widget _buildEmptyState(ThemeData theme) {
+    final user = context.read<AuthCubit>().currentUser;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -216,10 +218,10 @@ class _ClientsListScreenState extends State<ClientsListScreen> {
             ),
           ),
           const SizedBox(height: AppConstants.defaultPadding),
-          PrimaryButton(
+       user!.hasPermission('clientsWrite')?   PrimaryButton(
             text: 'Add Client',
             onPressed: () => Navigator.pushNamed(context,'/add-client'),
-          ),
+          ):SizedBox.shrink(),
         ],
       ),
     );

@@ -42,7 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
         body: BlocListener<AuthCubit, AuthState>(
           listener: (context, state) {
             if (state is AuthAuthenticated) {
-              Navigator.pushNamed(context,'/dashboard',);
+              Navigator.pushNamedAndRemoveUntil(context,'/dashboard', (route) => false);
             } else if (state is AuthError) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(

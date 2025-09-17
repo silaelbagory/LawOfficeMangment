@@ -195,6 +195,7 @@ class _CasesListScreenState extends State<CasesListScreen> {
   }
 
   Widget _buildEmptyState(ThemeData theme) {
+    final user = context.read<AuthCubit>().currentUser;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -217,10 +218,10 @@ class _CasesListScreenState extends State<CasesListScreen> {
             ),
           ),
           const SizedBox(height: AppConstants.defaultPadding),
-          PrimaryButton(
+       user!.hasPermission('casesWrite')?   PrimaryButton(
             text: AppLocalizations.of(context)!.addCase,
             onPressed: () => Navigator.pushNamed(context, '/add-case'),
-          ),
+          ):SizedBox.shrink(),
         ],
       ),
     );
@@ -326,6 +327,8 @@ DataCell(
   }
 
   DataRow _buildDesktopDataTableRow(ThemeData theme, CaseModel caseModel) {
+           final firestoreService = FirestoreService();
+
     return DataRow(
       cells: [
         DataCell(
@@ -336,7 +339,22 @@ DataCell(
             ),
           ),
         ),
-        DataCell(Text(caseModel.clientId ?? AppLocalizations.of(context)!.noClient)),
+        DataCell( FutureBuilder<String?>(
+
+    future: firestoreService.getClientNameById(caseModel.clientId ?? ''),
+    builder: (context, snapshot) {
+      if (snapshot.connectionState == ConnectionState.waiting) {
+        return const Text("Loading..."); // show loading text
+      }
+      if (snapshot.hasError) {
+        return const Text("Error");
+      }
+      if (!snapshot.hasData || snapshot.data == null) {
+        return Text(AppLocalizations.of(context)!.noClient);
+      }
+      return Text(snapshot.data!);
+    },
+  ),),
         DataCell(_buildStatusChip(theme, caseModel.status)),
         DataCell(_buildPriorityChip(theme, caseModel.priority)),
         DataCell(Text(caseModel.dueDateFormatted)),

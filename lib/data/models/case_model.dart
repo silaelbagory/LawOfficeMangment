@@ -1,4 +1,3 @@
-
 enum CaseStatus { open, inProgress, onHold, closed }
 enum CasePriority { low, medium, high, urgent }
 
@@ -136,6 +135,7 @@ class CaseModel {
   CaseModel removeDocument(String documentId) =>
       copyWith(documents: documents.where((d) => d != documentId).toList());
 
+  // ✅ Safe Firestore map
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -146,10 +146,10 @@ class CaseModel {
       'clientId': clientId,
       'status': status.name,
       'priority': priority.name,
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt.toIso8601String(),
-      'dueDate': dueDate?.toIso8601String(),
-      'hearingDate': hearingDate?.toIso8601String(),
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+      'dueDate': dueDate,
+      'hearingDate': hearingDate,
       'notes': notes,
       'estimatedHours': estimatedHours,
       'caseNumber': caseNumber,
@@ -162,7 +162,24 @@ class CaseModel {
     };
   }
 
+  // ✅ Safe parsing from Firestore / JSON
   factory CaseModel.fromMap(Map<String, dynamic> map) {
+    CaseStatus safeStatus(String? raw) {
+      if (raw == null) return CaseStatus.open;
+      return CaseStatus.values.firstWhere(
+        (e) => e.name == raw,
+        orElse: () => CaseStatus.open,
+      );
+    }
+
+    CasePriority safePriority(String? raw) {
+      if (raw == null) return CasePriority.medium;
+      return CasePriority.values.firstWhere(
+        (e) => e.name == raw,
+        orElse: () => CasePriority.medium,
+      );
+    }
+
     return CaseModel(
       id: map['id'] ?? '',
       title: map['title'] ?? '',
@@ -170,14 +187,16 @@ class CaseModel {
       userId: map['userId'] ?? '',
       managerId: map['managerId'] ?? '',
       clientId: map['clientId'],
-      status: CaseStatus.values.firstWhere((e) => e.name == map['status'], orElse: () => CaseStatus.open),
-      priority: CasePriority.values.firstWhere((e) => e.name == map['priority'], orElse: () => CasePriority.medium),
-      createdAt: DateTime.parse(map['createdAt']),
-      updatedAt: DateTime.parse(map['updatedAt']),
-      dueDate: map['dueDate'] != null ? DateTime.parse(map['dueDate']) : null,
-      hearingDate: map['hearingDate'] != null ? DateTime.parse(map['hearingDate']) : null,
+      status: safeStatus(map['status']),
+      priority: safePriority(map['priority']),
+      createdAt: _parseDate(map['createdAt']),
+      updatedAt: _parseDate(map['updatedAt']),
+      dueDate: _tryParseDate(map['dueDate']),
+      hearingDate: _tryParseDate(map['hearingDate']),
       notes: map['notes'],
-      estimatedHours: map['estimatedHours']?.toDouble(),
+      estimatedHours: (map['estimatedHours'] is int)
+          ? (map['estimatedHours'] as int).toDouble()
+          : map['estimatedHours']?.toDouble(),
       caseNumber: map['caseNumber'],
       courtName: map['courtName'],
       caseType: map['caseType'],
@@ -186,6 +205,19 @@ class CaseModel {
       tags: List<String>.from(map['tags'] ?? []),
       documents: List<String>.from(map['documents'] ?? []),
     );
+  }
+
+  // 🔹 Helpers to parse dates safely
+  static DateTime _parseDate(dynamic value) {
+    if (value == null) return DateTime.now();
+    if (value is DateTime) return value;
+    return DateTime.tryParse(value.toString()) ?? DateTime.now();
+  }
+
+  static DateTime? _tryParseDate(dynamic value) {
+    if (value == null) return null;
+    if (value is DateTime) return value;
+    return DateTime.tryParse(value.toString());
   }
 
   // Computed properties
@@ -204,6 +236,7 @@ class CaseModel {
     if (dueDate == null) return '-';
     return '${dueDate!.day}/${dueDate!.month}/${dueDate!.year}';
   }
+
   String get createdAtFormatted {
     return '${createdAt.day}/${createdAt.month}/${createdAt.year}';
   }

@@ -166,111 +166,117 @@ class _EditCaseScreenState extends State<EditCaseScreen> {
       ),
     );
   }
+Widget _buildBasicInfoSection(ThemeData theme) {
+  return Card(
+    child: Padding(
+      padding: const EdgeInsets.all(AppConstants.defaultPadding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Basic Information',
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: AppConstants.defaultPadding),
+          CustomTextField(
+            label: 'Case Title',
+            hint: 'Enter case title',
+            controller: _titleController,
+            validator: Validators.validateCaseTitle,
+            isRequired: true,
+          ),
+          const SizedBox(height: AppConstants.defaultPadding),
+          MultilineTextField(
+            label: 'Case Description',
+            hint: 'Enter case description',
+            controller: _descriptionController,
+            validator: Validators.validateCaseDescription,
+            isRequired: true,
+            maxLines: 4,
+          ),
+          const SizedBox(height: AppConstants.defaultPadding),
 
-  Widget _buildBasicInfoSection(ThemeData theme) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppConstants.defaultPadding),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Basic Information',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
+          /// ✅ هنا التعديل
+          DropdownButtonFormField<String?>(
+            value: (_selectedClientId != null &&
+                    _clients.any((c) => c.id == _selectedClientId))
+                ? _selectedClientId
+                : null,
+            decoration: const InputDecoration(
+              labelText: 'Client',
+              border: OutlineInputBorder(),
+            ),
+            items: [
+              const DropdownMenuItem<String?>(
+                value: null,
+                child: Text('Select a client (optional)'),
               ),
-            ),
-            const SizedBox(height: AppConstants.defaultPadding),
-            CustomTextField(
-              label: 'Case Title',
-              hint: 'Enter case title',
-              controller: _titleController,
-              validator: Validators.validateCaseTitle,
-              isRequired: true,
-            ),
-            const SizedBox(height: AppConstants.defaultPadding),
-            MultilineTextField(
-              label: 'Case Description',
-              hint: 'Enter case description',
-              controller: _descriptionController,
-              validator: Validators.validateCaseDescription,
-              isRequired: true,
-              maxLines: 4,
-            ),
-            const SizedBox(height: AppConstants.defaultPadding),
-            DropdownButtonFormField<String?>(
-              value: _selectedClientId,
-              decoration: const InputDecoration(
-                labelText: 'Client',
-                border: OutlineInputBorder(),
+              ..._clients.map((client) => DropdownMenuItem<String?>(
+                    value: client.id,
+                    child: Text(client.displayName),
+                  )),
+            ],
+            onChanged: (value) {
+              setState(() {
+                _selectedClientId = value;
+              });
+            },
+          ),
+
+          const SizedBox(height: AppConstants.defaultPadding),
+          Row(
+            children: [
+              Expanded(
+                child: DropdownButtonFormField<CaseStatus>(
+                  value: _selectedStatus,
+                  decoration: const InputDecoration(
+                    labelText: 'Case Status',
+                    border: OutlineInputBorder(),
+                  ),
+                  items: CaseStatus.values.map((status) {
+                    return DropdownMenuItem(
+                      value: status,
+                      child: Text(status.displayText),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedStatus = value ?? CaseStatus.open;
+                    });
+                  },
+                ),
               ),
-              items: [
-                const DropdownMenuItem<String?>(
-                  value: null,
-                  child: Text('Select a client (optional)'),
-                ),
-                ..._clients.map((client) => DropdownMenuItem<String?>(
-                  value: client.id,
-                  child: Text(client.displayName),
-                )),
-              ],
-              onChanged: (value) {
-                setState(() {
-                  _selectedClientId = value;
-                });
-              },
-            ),
-            const SizedBox(height: AppConstants.defaultPadding),
-            Row(
-              children: [
-                Expanded(
-                  child: DropdownButtonFormField<CaseStatus>(
-                    value: _selectedStatus,
-                    decoration: const InputDecoration(
-                      labelText: 'Case Status',
-                      border: OutlineInputBorder(),
-                    ),
-                    items: CaseStatus.values.map((status) {
-                      return DropdownMenuItem(
-                        value: status,
-                        child: Text(status.displayText),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedStatus = value ?? CaseStatus.open;
-                      });
-                    },
+              const SizedBox(width: AppConstants.defaultPadding),
+              Expanded(
+                child: DropdownButtonFormField<CasePriority>(
+                  value: _selectedPriority,
+                  decoration: const InputDecoration(
+                    labelText: 'Case Priority',
+                    border: OutlineInputBorder(),
                   ),
+                  items: CasePriority.values.map((priority) {
+                    return DropdownMenuItem(
+                      value: priority,
+                      child: Text(priority.displayText),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedPriority = value ?? CasePriority.medium;
+                    });
+                  },
                 ),
-                const SizedBox(width: AppConstants.defaultPadding),
-                Expanded(
-                  child: DropdownButtonFormField<CasePriority>(
-                    value: _selectedPriority,
-                    decoration: const InputDecoration(
-                      labelText: 'Case Priority',
-                      border: OutlineInputBorder(),
-                    ),
-                    items: CasePriority.values.map((priority) {
-                      return DropdownMenuItem(
-                        value: priority,
-                        child: Text(priority.displayText),
-                      );
-                    }).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _selectedPriority = value ?? CasePriority.medium;
-                      });
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+        ],
       ),
-    );
-  }
+    ),
+  );
+}
+
 
   Widget _buildCaseDetailsSection(ThemeData theme) {
     return Card(

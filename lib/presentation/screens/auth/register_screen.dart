@@ -47,7 +47,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       body: BlocListener<AuthCubit, AuthState>(
         listener: (context, state) {
           if (state is AuthAuthenticated) {
-            Navigator.pushNamed(context,'/dashboard');
+            Navigator.pushNamedAndRemoveUntil(context,'/dashboard', (route) => false);
           } else if (state is AuthAccountCreated) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -59,7 +59,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             // Navigate back to login after showing success message
             Future.delayed(Duration(seconds: 2), () {
               if(mounted){
-                  Navigator.pushNamed(context,'/login');
+                  Navigator.pushNamedAndRemoveUntil(context,'/login', (route) => false);
               }
            
             });
