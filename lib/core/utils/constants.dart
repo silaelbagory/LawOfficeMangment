@@ -89,6 +89,7 @@ class AppTextStyles {
 class AppThemes {
   static ThemeData get lightTheme {
     return ThemeData(
+      fontFamily: null,
       useMaterial3: true,
       brightness: Brightness.light,
       scaffoldBackgroundColor: Colors.transparent, // الصورة تبان

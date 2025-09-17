@@ -59,6 +59,7 @@ class _CasesListScreenState extends State<CasesListScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.cases),
         actions: [

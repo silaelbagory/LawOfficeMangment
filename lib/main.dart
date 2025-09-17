@@ -152,8 +152,10 @@ class _LawOfficeAppState extends State<LawOfficeApp> {
         return MaterialApp(
           title: 'Elattar Official',
           debugShowCheckedModeBanner: false,
-          theme: AppThemes.lightTheme,
+          theme: AppThemes.lightTheme ,
+          
           darkTheme: AppThemes.darkTheme,
+          
           themeMode: _isDarkMode ? ThemeMode.dark : ThemeMode.light,
           locale: Locale(_currentLanguage),
           supportedLocales: AppLocalizations.supportedLocales,

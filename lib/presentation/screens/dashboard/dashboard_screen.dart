@@ -281,7 +281,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           borderRadius: BorderRadius.circular(AppConstants.borderRadius),
         ),
         child: InkWell(
-          onTap: () => Navigator.pushReplacementNamed(context,route),
+          onTap: () => Navigator.pushNamedAndRemoveUntil(context,route,(route)=>false),
           borderRadius: BorderRadius.circular(AppConstants.borderRadius),
           child: Padding(
             padding: const EdgeInsets.all(AppConstants.defaultPadding),
