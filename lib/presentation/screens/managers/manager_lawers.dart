@@ -10,6 +10,8 @@ class MyLawyersScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+            backgroundColor: Colors.transparent,
+
       appBar: AppBar(title: const Text("My Lawyers")),
       body: BlocBuilder<UserCubit, UserState>(
         builder: (context, state) {

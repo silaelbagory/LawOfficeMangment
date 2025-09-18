@@ -43,6 +43,8 @@ class _LawyersActionsScreenState extends State<LawyersActionsScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
+            backgroundColor: Colors.transparent,
+
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.lawyersActions),
         actions: [

@@ -58,89 +58,87 @@ class _ClientsListScreenState extends State<ClientsListScreen> {
     final theme = Theme.of(context);
  final user = context.read<AuthCubit>().currentUser;
 
-    return ThemedBackground(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          title: Text(AppLocalizations.of(context)!.clients),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.filter_list),
-              onPressed: _showFilterDialog,
-            ),
-            IconButton(
-              icon: const Icon(Icons.sort),
-              onPressed: _showSortDialog,
-            ),
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: _loadClients,
-            ),
-          ],
-        ),
-        body: Column(
-          children: [
-            _buildSearchAndFilters(theme),
-            Expanded(
-              child: BlocBuilder<ClientCubit, ClientState>(
-                builder: (context, state) {
-                  if (state is ClientLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (state is ClientError) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.error_outline,
-                            size: 64,
-                            color: theme.colorScheme.error,
-                          ),
-                          const SizedBox(height: AppConstants.defaultPadding),
-                          Text(
-                            'Error loading clients',
-                            style: theme.textTheme.titleLarge,
-                          ),
-                          const SizedBox(height: AppConstants.smallPadding),
-                          Text(
-                            state.message,
-                            style: theme.textTheme.bodyMedium,
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: AppConstants.defaultPadding),
-                          PrimaryButton(
-                            text: 'Retry',
-                            onPressed: _loadClients,
-                          ),
-                        ],
-                      ),
-                    );
-                  } else if (state is ClientLoaded) {
-                    final clients = _filterAndSortClients(state.clients);
-                    
-                    if (clients.isEmpty) {
-                      return _buildEmptyState(theme);
-                    }
-      
-                    return ResponsiveWidget(
-                      mobile: _buildMobileView(theme, clients),
-                      tablet: _buildTabletView(theme, clients),
-                      desktop: _buildDesktopView(theme, clients),
-                    );
-                  }
-                  
-                  return const Center(child: CircularProgressIndicator());
-                },
-              ),
-            ),
-          ],
-        ),
-        floatingActionButton:      user!.hasPermission('clientsWrite')?
-       FloatingActionButton(
-          onPressed: () => Navigator.pushNamed(context,'/add-client'),
-          child: const Icon(Icons.add),
-        ):SizedBox.shrink(),
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.clients),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.filter_list),
+            onPressed: _showFilterDialog,
+          ),
+          IconButton(
+            icon: const Icon(Icons.sort),
+            onPressed: _showSortDialog,
+          ),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _loadClients,
+          ),
+        ],
       ),
+      body: Column(
+        children: [
+          _buildSearchAndFilters(theme),
+          Expanded(
+            child: BlocBuilder<ClientCubit, ClientState>(
+              builder: (context, state) {
+                if (state is ClientLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (state is ClientError) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          size: 64,
+                          color: theme.colorScheme.error,
+                        ),
+                        const SizedBox(height: AppConstants.defaultPadding),
+                        Text(
+                          'Error loading clients',
+                          style: theme.textTheme.titleLarge,
+                        ),
+                        const SizedBox(height: AppConstants.smallPadding),
+                        Text(
+                          state.message,
+                          style: theme.textTheme.bodyMedium,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: AppConstants.defaultPadding),
+                        PrimaryButton(
+                          text: 'Retry',
+                          onPressed: _loadClients,
+                        ),
+                      ],
+                    ),
+                  );
+                } else if (state is ClientLoaded) {
+                  final clients = _filterAndSortClients(state.clients);
+                  
+                  if (clients.isEmpty) {
+                    return _buildEmptyState(theme);
+                  }
+    
+                  return ResponsiveWidget(
+                    mobile: _buildMobileView(theme, clients),
+                    tablet: _buildTabletView(theme, clients),
+                    desktop: _buildDesktopView(theme, clients),
+                  );
+                }
+                
+                return const Center(child: CircularProgressIndicator());
+              },
+            ),
+          ),
+        ],
+      ),
+      floatingActionButton:      user!.hasPermission('clientsWrite')?
+     FloatingActionButton(
+        onPressed: () => Navigator.pushNamed(context,'/add-client'),
+        child: const Icon(Icons.add),
+      ):SizedBox.shrink(),
     );
   }
 

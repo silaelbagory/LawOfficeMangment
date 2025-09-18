@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' show Intl;
+import 'package:lawofficemanagementsystem/core/utils/them_background.dart';
 import 'package:lawofficemanagementsystem/presentation/screens/auth/register_screen.dart';
 import 'package:lawofficemanagementsystem/presentation/screens/cases/add_case_screen.dart';
 import 'package:lawofficemanagementsystem/presentation/screens/clients/add_client_screen.dart';
@@ -150,6 +151,7 @@ class _LawOfficeAppState extends State<LawOfficeApp> {
       builder: (context, authState) {
         isLoggedIn = authState is app_auth.AuthAuthenticated;
         return MaterialApp(
+          
           title: 'Elattar Official',
           debugShowCheckedModeBanner: false,
           theme: AppThemes.lightTheme ,
@@ -165,10 +167,15 @@ class _LawOfficeAppState extends State<LawOfficeApp> {
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
+          builder:(context, child) {
+            return ThemedBackground(child: child!);
+          },
           routes: {
+                        '/login':(context)=>LoginScreen(),
+
             '/my_lawyers':(context)=>UsersManagementScreen(),
                         '/document_list':(context)=>DocumentsListScreen(),
-
+        
          //    '/clients':(context)=>ClientsListScreen(),
             '/add-case': (context) => AddCaseScreen(),
         //     '/my_lawyers': (context) => MyLawyersScreen(),
@@ -176,7 +183,7 @@ class _LawOfficeAppState extends State<LawOfficeApp> {
             '/upload-document': (context) => UploadDocumentScreen(),
             '/register': (context) => RegisterScreen(),
           //  '/pending-users': (context) => PendingUsersScreen(),
-'/add_lawyer':
+        '/add_lawyer':
                 (context) => Addlawyerpage(
                   isDarkMode: _isDarkMode,
                   currentLanguage: _currentLanguage,
@@ -217,7 +224,7 @@ class _LawOfficeAppState extends State<LawOfficeApp> {
                   onLogout: _logout,
                 ),
           },
-
+        
           home:
               isLoggedIn
                   ? DashboardPage(

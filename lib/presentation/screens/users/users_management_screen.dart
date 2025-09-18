@@ -32,6 +32,8 @@ class _UsersManagementScreenState extends State<UsersManagementScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
+            backgroundColor: Colors.transparent,
+
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.usersManagement),
         actions: [

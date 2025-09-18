@@ -93,6 +93,8 @@ class _EditCaseScreenState extends State<EditCaseScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
+            backgroundColor: Colors.transparent,
+
       appBar: AppBar(
         title: Text('Edit Case: ${widget.caseModel.title}'),
         actions: [

@@ -36,38 +36,36 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return ThemedBackground(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        body: BlocListener<AuthCubit, AuthState>(
-          listener: (context, state) {
-            if (state is AuthAuthenticated) {
-              Navigator.pushNamedAndRemoveUntil(context,'/dashboard', (route) => false);
-            } else if (state is AuthError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: theme.colorScheme.error,
-                ),
-              );
-            }
-          },
-          child: SafeArea(
-            child: Center(
-              child: ResponsiveContainer(
-                maxWidth: ResponsiveUtils.getFormFieldWidth(context),
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _buildHeader(theme),
-                      SizedBox(height: ResponsiveUtils.getResponsivePadding(context) * 2),
-                      _buildLoginForm(theme),
-                      SizedBox(height: ResponsiveUtils.getResponsivePadding(context)),
-                      _buildFooter(theme),
-                    ],
-                  ),
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: BlocListener<AuthCubit, AuthState>(
+        listener: (context, state) {
+          if (state is AuthAuthenticated) {
+            Navigator.pushNamedAndRemoveUntil(context,'/dashboard', (route) => false);
+          } else if (state is AuthError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: theme.colorScheme.error,
+              ),
+            );
+          }
+        },
+        child: SafeArea(
+          child: Center(
+            child: ResponsiveContainer(
+              maxWidth: ResponsiveUtils.getFormFieldWidth(context),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _buildHeader(theme),
+                    SizedBox(height: ResponsiveUtils.getResponsivePadding(context) * 2),
+                    _buildLoginForm(theme),
+                    SizedBox(height: ResponsiveUtils.getResponsivePadding(context)),
+                    _buildFooter(theme),
+                  ],
                 ),
               ),
             ),

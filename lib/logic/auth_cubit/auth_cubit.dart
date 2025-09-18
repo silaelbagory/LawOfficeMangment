@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../data/models/user_model.dart';
@@ -113,6 +114,8 @@ Future<void> signInWithEmailAndPassword({
       final user = await _userRepository.getUser(userId);
       if (user != null) {
         emit(AuthAccountCreated(user));
+        await FirebaseAuth.instance.signOut();
+ 
       } else {
         emit(AuthError('Registration failed. Please try again.'));
       }

@@ -70,6 +70,8 @@ class _UploadDocumentScreenState extends State<UploadDocumentScreen> {
 
 
     return Scaffold(
+            backgroundColor: Colors.transparent,
+
       appBar: AppBar(
         title: const Text('Upload Document'),
         // Removed the upload IconButton from actions

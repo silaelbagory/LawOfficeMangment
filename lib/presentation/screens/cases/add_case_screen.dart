@@ -71,6 +71,8 @@ class _AddCaseScreenState extends State<AddCaseScreen> {
 
 
     return Scaffold(
+            backgroundColor: Colors.transparent,
+
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.addCase),
         actions: [

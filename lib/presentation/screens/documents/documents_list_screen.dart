@@ -57,88 +57,86 @@ class _DocumentsListScreenState extends State<DocumentsListScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 final user=context.read<AuthCubit>().currentUser;
-    return ThemedBackground(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          title: Text(AppLocalizations.of(context)!.documents),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.filter_list),
-              onPressed: _showFilterDialog,
-            ),
-            IconButton(
-              icon: const Icon(Icons.sort),
-              onPressed: _showSortDialog,
-            ),
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: _loadDocuments,
-            ),
-          ],
-        ),
-        body: Column(
-          children: [
-            _buildSearchAndFilters(theme),
-            Expanded(
-              child: BlocBuilder<DocumentCubit, DocumentState>(
-                builder: (context, state) {
-                  if (state is DocumentLoading) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (state is DocumentError) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.error_outline,
-                            size: 64,
-                            color: theme.colorScheme.error,
-                          ),
-                          const SizedBox(height: AppConstants.defaultPadding),
-                          Text(
-                            AppLocalizations.of(context)!.errorLoadingDocuments,
-                            style: theme.textTheme.titleLarge,
-                          ),
-                          const SizedBox(height: AppConstants.smallPadding),
-                          Text(
-                            state.message,
-                            style: theme.textTheme.bodyMedium,
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: AppConstants.defaultPadding),
-                          PrimaryButton(
-                            text: AppLocalizations.of(context)!.retry,
-                            onPressed: _loadDocuments,
-                          ),
-                        ],
-                      ),
-                    );
-                  } else if (state is DocumentLoaded) {
-                    final documents = _filterAndSortDocuments(state.documents);
-                    
-                    if (documents.isEmpty) {
-                      return _buildEmptyState(theme);
-                    }
-      
-                    return ResponsiveWidget(
-                      mobile: _buildMobileView(theme, documents),
-                      tablet: _buildTabletView(theme, documents),
-                      desktop: _buildDesktopView(theme, documents),
-                    );
-                  }
-                  
-                  return const Center(child: CircularProgressIndicator());
-                },
-              ),
-            ),
-          ],
-        ),
-        floatingActionButton:user!.hasPermission('documentsWrite')? FloatingActionButton(
-          onPressed: () => Navigator.pushNamed(context,'/upload-document'),
-          child: const Icon(Icons.upload),
-        ):SizedBox.shrink(),
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.documents),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.filter_list),
+            onPressed: _showFilterDialog,
+          ),
+          IconButton(
+            icon: const Icon(Icons.sort),
+            onPressed: _showSortDialog,
+          ),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _loadDocuments,
+          ),
+        ],
       ),
+      body: Column(
+        children: [
+          _buildSearchAndFilters(theme),
+          Expanded(
+            child: BlocBuilder<DocumentCubit, DocumentState>(
+              builder: (context, state) {
+                if (state is DocumentLoading) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (state is DocumentError) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.error_outline,
+                          size: 64,
+                          color: theme.colorScheme.error,
+                        ),
+                        const SizedBox(height: AppConstants.defaultPadding),
+                        Text(
+                          AppLocalizations.of(context)!.errorLoadingDocuments,
+                          style: theme.textTheme.titleLarge,
+                        ),
+                        const SizedBox(height: AppConstants.smallPadding),
+                        Text(
+                          state.message,
+                          style: theme.textTheme.bodyMedium,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: AppConstants.defaultPadding),
+                        PrimaryButton(
+                          text: AppLocalizations.of(context)!.retry,
+                          onPressed: _loadDocuments,
+                        ),
+                      ],
+                    ),
+                  );
+                } else if (state is DocumentLoaded) {
+                  final documents = _filterAndSortDocuments(state.documents);
+                  
+                  if (documents.isEmpty) {
+                    return _buildEmptyState(theme);
+                  }
+    
+                  return ResponsiveWidget(
+                    mobile: _buildMobileView(theme, documents),
+                    tablet: _buildTabletView(theme, documents),
+                    desktop: _buildDesktopView(theme, documents),
+                  );
+                }
+                
+                return const Center(child: CircularProgressIndicator());
+              },
+            ),
+          ),
+        ],
+      ),
+      floatingActionButton:user!.hasPermission('documentsWrite')? FloatingActionButton(
+        onPressed: () => Navigator.pushNamed(context,'/upload-document'),
+        child: const Icon(Icons.upload),
+      ):SizedBox.shrink(),
     );
   }
 

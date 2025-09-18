@@ -104,6 +104,8 @@ class _EditClientScreenState extends State<EditClientScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
+            backgroundColor: Colors.transparent,
+
       appBar: AppBar(
         title: Text('Edit Client: ${widget.clientModel.displayName}'),
         actions: [

@@ -33,6 +33,8 @@ class _LawyerActionsScreenState extends State<LawyerActionsScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
+            backgroundColor: Colors.transparent,
+
       appBar: AppBar(
         title: Text('${widget.lawyer.name} - Actions'),
         actions: [

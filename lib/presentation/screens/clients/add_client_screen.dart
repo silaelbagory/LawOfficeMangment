@@ -81,6 +81,8 @@ class _AddClientScreenState extends State<AddClientScreen> {
 
 
     return Scaffold(
+            backgroundColor: Colors.transparent,
+
       appBar: AppBar(
         title: Text(AppLocalizations.of(context)!.addClient),
         actions: [

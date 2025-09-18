@@ -12,6 +12,8 @@ class LawyerActionsScreen extends StatelessWidget {
     final actionRepository = ActionRepository(FirestoreService());
 
     return Scaffold(
+            backgroundColor: Colors.transparent,
+
       appBar: AppBar(
         title: const Text("Lawyer Actions"),
       ),

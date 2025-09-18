@@ -53,50 +53,48 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return ThemedBackground(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          title: Text(AppLocalizations.of(context)!.dashboard),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: _loadDashboardData,
-            ),
-            IconButton(
-              icon: const Icon(Icons.logout),
-              onPressed: () => _showLogoutDialog(),
-            ),
-          ],
-        ),
-        body: BlocBuilder<AuthCubit, dynamic>(
-          builder: (context, authState) {
-            final user = context.read<AuthCubit>().currentUser;
-            if (user == null) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            
-            return RefreshIndicator(
-              onRefresh: () async => _loadDashboardData(),
-              child: ResponsiveContainer(
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      _buildWelcomeSection(theme, user),
-                      SizedBox(height: ResponsiveUtils.getResponsivePadding(context)),
-                      _buildQuickActions(theme, user),
-                      SizedBox(height: ResponsiveUtils.getResponsivePadding(context)),
-                      _buildStatisticsSection(theme, user),
-                      SizedBox(height: ResponsiveUtils.getResponsivePadding(context)),
-                      _buildRecentActivity(theme, user),
-                    ],
-                  ),
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.dashboard),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _loadDashboardData,
+          ),
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () => _showLogoutDialog(),
+          ),
+        ],
+      ),
+      body: BlocBuilder<AuthCubit, dynamic>(
+        builder: (context, authState) {
+          final user = context.read<AuthCubit>().currentUser;
+          if (user == null) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          
+          return RefreshIndicator(
+            onRefresh: () async => _loadDashboardData(),
+            child: ResponsiveContainer(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildWelcomeSection(theme, user),
+                    SizedBox(height: ResponsiveUtils.getResponsivePadding(context)),
+                    _buildQuickActions(theme, user),
+                    SizedBox(height: ResponsiveUtils.getResponsivePadding(context)),
+                    _buildStatisticsSection(theme, user),
+                    SizedBox(height: ResponsiveUtils.getResponsivePadding(context)),
+                    _buildRecentActivity(theme, user),
+                  ],
                 ),
               ),
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }

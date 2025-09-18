@@ -41,51 +41,49 @@ class _AddLawyerScreenState extends State<AddLawyerScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return ThemedBackground(
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          title: Text(AppLocalizations.of(context)!.addLawyer),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.save),
-              onPressed: _saveLawyer,
-            ),
-          ],
-        ),
-        body: BlocListener<UserCubit, UserState>(
-          listener: (context, state) {
-            if (state is UserCreated) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(AppLocalizations.of(context)!.lawyerAddedSuccessfully),
-                  backgroundColor: theme.colorScheme.primary,
-                ),
-              );
-              Navigator.pushNamed(context,'/dashboard');
-            } else if (state is UserError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: theme.colorScheme.error,
-                ),
-              );
-            }
-          },
-          child: ResponsiveContainer(
-            child: SingleChildScrollView(
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _buildBasicInfoSection(theme),
-                    SizedBox(height: ResponsiveUtils.getResponsivePadding(context)),
-                    _buildPermissionsSection(theme),
-                    SizedBox(height: ResponsiveUtils.getResponsivePadding(context)),
-                    _buildActionButtons(theme),
-                  ],
-                ),
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      appBar: AppBar(
+        title: Text(AppLocalizations.of(context)!.addLawyer),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.save),
+            onPressed: _saveLawyer,
+          ),
+        ],
+      ),
+      body: BlocListener<UserCubit, UserState>(
+        listener: (context, state) {
+          if (state is UserCreated) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(AppLocalizations.of(context)!.lawyerAddedSuccessfully),
+                backgroundColor: theme.colorScheme.primary,
+              ),
+            );
+            Navigator.pushNamed(context,'/dashboard');
+          } else if (state is UserError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: theme.colorScheme.error,
+              ),
+            );
+          }
+        },
+        child: ResponsiveContainer(
+          child: SingleChildScrollView(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildBasicInfoSection(theme),
+                  SizedBox(height: ResponsiveUtils.getResponsivePadding(context)),
+                  _buildPermissionsSection(theme),
+                  SizedBox(height: ResponsiveUtils.getResponsivePadding(context)),
+                  _buildActionButtons(theme),
+                ],
               ),
             ),
           ),

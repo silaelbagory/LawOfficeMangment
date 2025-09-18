@@ -44,25 +44,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: BlocListener<AuthCubit, AuthState>(
         listener: (context, state) {
-          if (state is AuthAuthenticated) {
-            Navigator.pushNamedAndRemoveUntil(context,'/dashboard', (route) => false);
-          } else if (state is AuthAccountCreated) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('Account created successfully! Your account is pending approval. You will be notified once approved.'),
-                backgroundColor: theme.colorScheme.primary,
-                duration: Duration(seconds: 5),
-              ),
+           if (state is AuthAccountCreated) {
+               ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text(
+          'Account created successfully! Your account is pending approval. You will be notified once approved.',
+        ),
+        backgroundColor: theme.colorScheme.primary,
+        duration: const Duration(seconds: 5),
+        action: SnackBarAction(
+          label: 'OK',
+          textColor: Colors.white, // يخلي زرار OK باين
+          onPressed: () {
+            Navigator.of(context).pushNamedAndRemoveUntil(
+              '/login',
+              (route) => false,
             );
-            // Navigate back to login after showing success message
-            Future.delayed(Duration(seconds: 2), () {
-              if(mounted){
-                  Navigator.pushNamedAndRemoveUntil(context,'/login', (route) => false);
-              }
+          },
+        ),
+      ),
+    );
            
-            });
+            
           } else if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -266,7 +272,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ),
         const SizedBox(height: AppConstants.smallPadding),
         TextButton(
-          onPressed: () => Navigator.pushNamed(context,'/login'),
+          onPressed: () {
+     Navigator.of(context, rootNavigator: true).pushNamed('/login');
+ Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil(
+    '/login',
+    (route) => false,
+  );
+},
           child: Text(
             AppLocalizations.of(context)!.login,
             style: theme.textTheme.bodyMedium?.copyWith(
