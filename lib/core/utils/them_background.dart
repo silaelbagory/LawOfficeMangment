@@ -9,18 +9,20 @@ class ThemedBackground extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
-      decoration: BoxDecoration(
-        image: DecorationImage(
-          image: AssetImage(
-            isDark
-                ? "assets/WhatsApp Image 2025-09-05 at 19.25.57_0deb8013.jpg"   // صورة الوضع الليلي
-                : "assets/WhatsApp Image 2025-09-05 at 19.25.57_551e6ec5.jpg", // صورة الوضع النهاري
+    return Stack(
+      children:[ Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage(
+              isDark
+                  ? "assets/WhatsApp Image 2025-09-05 at 19.25.57_0deb8013.jpg"   // صورة الوضع الليلي
+                  : "assets/WhatsApp Image 2025-09-05 at 19.25.57_551e6ec5.jpg", // صورة الوضع النهاري
+            ),
+            fit: BoxFit.cover,
           ),
-          fit: BoxFit.cover,
         ),
-      ),
-      child: child,
+        child: child,
+      ),]
     );
   }
 }
